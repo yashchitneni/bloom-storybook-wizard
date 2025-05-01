@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,12 +62,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom StoryBloom colors
+				persimmon: "#FF6B46", // Primary - buttons, accents
+				sunshine: "#FFD166", // Accent - badges, icons
+				mint: "#B8F2E6",     // Cool - progress bar, tints
+				darkText: "#1E1E2F", // Main text color
+				lightBg: "#F8F9FB",  // Background color
+			},
+			fontFamily: {
+				'poppins': ['Poppins', 'sans-serif'],
+				'inter': ['Inter', 'sans-serif'],
+				'fredoka': ['"Fredoka One"', 'cursive'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				'999': '999px', // Pill buttons
 			},
 			keyframes: {
 				'accordion-down': {
@@ -84,11 +97,35 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in-scale': {
+					'0%': {
+						opacity: '0',
+						transform: 'scale(1.05)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'scale(1)'
+					}
+				},
+				'arrow-wiggle': {
+					'0%, 100%': { transform: 'rotate(0deg)' },
+					'25%': { transform: 'rotate(5deg)' },
+					'75%': { transform: 'rotate(-5deg)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in-scale': 'fade-in-scale 0.5s ease-out forwards',
+				'arrow-wiggle': 'arrow-wiggle 1s ease-in-out infinite'
+			},
+			boxShadow: {
+				'card': '0 2px 8px rgba(0, 0, 0, 0.05)',
+			},
+			transitionProperty: {
+				'height': 'height',
+				'spacing': 'margin, padding',
 			}
 		}
 	},
