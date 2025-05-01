@@ -1,7 +1,7 @@
 
 import { ArrowRight } from "lucide-react";
 import Button from "./Button";
-import CardCluster from "./CardCluster";
+import TransformVisual from "./TransformVisual";
 
 const HeroSection = () => {
   const scrollToWizard = () => {
@@ -39,9 +39,9 @@ const HeroSection = () => {
             </div>
           </div>
           
-          {/* Right Content - Card Cluster */}
+          {/* Right Content - Transformation Visual */}
           <div className="relative">
-            <CardCluster />
+            <TransformVisual />
           </div>
         </div>
       </div>
