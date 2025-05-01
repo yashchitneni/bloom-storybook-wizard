@@ -66,25 +66,6 @@ const TransformVisual: React.FC = () => {
           <ArrowRight size={32} className="text-persimmon transform rotate-90" />
         </div>
       </div>
-
-      {/* Supporting Badges */}
-      <div
-        className={cn(
-          "absolute bottom-0 left-0 right-0 flex justify-center gap-4 transition-all duration-500",
-          isVisible ? "opacity-100 translate-y-0 delay-600" : "opacity-0 translate-y-8 delay-600"
-        )}
-      >
-        {/* 10+ Pages Badge */}
-        <Card className="w-[120px] h-[60px] bg-mint/20 flex items-center justify-center">
-          <div className="text-lg font-fredoka text-mint">10+ Pages</div>
-        </Card>
-
-        {/* 5★ Customer Rating Badge */}
-        <Card className="w-[120px] h-[60px] flex items-center justify-center gap-1">
-          <div className="text-lg font-fredoka text-persimmon">5★</div>
-          <div className="text-xs">Rating</div>
-        </Card>
-      </div>
     </div>
   );
 };
