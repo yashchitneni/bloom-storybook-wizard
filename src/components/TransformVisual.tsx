@@ -28,7 +28,7 @@ const TransformVisual: React.FC = () => {
         <Card className="w-[280px] h-[350px] p-3 border-8 border-white">
           <div className="w-full h-full bg-gray-100 overflow-hidden rounded">
             <img 
-              src="https://images.unsplash.com/photo-1501286353178-1ec881214838" 
+              src="public/lovable-uploads/499fd9c6-b707-4bc4-a99a-1b60715c2453.png" 
               alt="Child's photo" 
               className="w-full h-full object-cover"
             />
@@ -43,20 +43,12 @@ const TransformVisual: React.FC = () => {
           isVisible ? "opacity-100 translate-x-0 delay-200" : "opacity-0 translate-x-16 delay-200"
         )}
       >
-        <Card className="w-[320px] h-[460px] border-8 border-persimmon bg-sunshine flex flex-col items-center justify-center">
-          <div className="w-full h-full flex flex-col items-center justify-center p-4">
-            <div className="bg-white rounded-full w-40 h-40 mb-6 overflow-hidden border-4 border-persimmon">
-              {/* Stylized character version - cartoon style filter applied */}
-              <img 
-                src="https://images.unsplash.com/photo-1501286353178-1ec881214838" 
-                alt="Stylized character" 
-                className="w-full h-full object-cover filter saturate-150"
-                style={{ mixBlendMode: 'multiply' }}
-              />
-            </div>
-            <h3 className="font-fredoka text-3xl text-darkText mb-2">Mia's Adventure</h3>
-            <p className="text-sm text-darkText opacity-75">A magical journey</p>
-          </div>
+        <Card className="w-[320px] h-[460px] overflow-hidden">
+          <img 
+            src="public/lovable-uploads/14e7ca41-a4ca-4ade-8f9c-6b539eeedd03.png" 
+            alt="The Camouflage Kid book cover" 
+            className="w-full h-full object-contain"
+          />
         </Card>
       </div>
 
@@ -78,7 +70,7 @@ const TransformVisual: React.FC = () => {
       {/* Supporting Badges */}
       <div
         className={cn(
-          "absolute bottom-4 left-0 right-0 flex justify-center gap-4 transition-all duration-500",
+          "absolute bottom-0 left-0 right-0 flex justify-center gap-4 transition-all duration-500",
           isVisible ? "opacity-100 translate-y-0 delay-600" : "opacity-0 translate-y-8 delay-600"
         )}
       >
@@ -92,11 +84,6 @@ const TransformVisual: React.FC = () => {
           <div className="text-lg font-fredoka text-persimmon">5★</div>
           <div className="text-xs">Rating</div>
         </Card>
-      </div>
-
-      {/* Mobile view - stacked version */}
-      <div className="md:hidden flex flex-col items-center space-y-6 pt-8">
-        {/* Mobile version is handled with absolute positioning above */}
       </div>
     </div>
   );
