@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Card from "./Card";
 import { useStorageBucket } from "@/hooks/use-storage-bucket";
+import { getFileUrl } from "@/utils/storage-utils";
 
 interface Storybook {
   id: string;
@@ -13,13 +14,14 @@ interface Storybook {
   style: string;
   status: string;
   created_at: string;
+  photo_path: string | null;
 }
 
 export const UserStorybooks = () => {
   const [storybooks, setStorybooks] = useState<Storybook[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const { isReady } = useStorageBucket('storybooks');
+  const { isReady } = useStorageBucket('images');
 
   useEffect(() => {
     if (user && isReady) {
@@ -118,7 +120,15 @@ export const UserStorybooks = () => {
         {storybooks.map((book) => (
           <Card key={book.id} className="overflow-hidden flex flex-col">
             <div className="h-40 bg-gray-100 flex items-center justify-center">
-              <div className="text-4xl">{book.style === 'Cartoon' ? '🎨' : book.style === 'Watercolor' ? '🌈' : book.style === '3D' ? '🧩' : '🎭'}</div>
+              {book.photo_path ? (
+                <img 
+                  src={getFileUrl(book.photo_path)} 
+                  alt={`${book.child_name}'s storybook`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-4xl">{book.style === 'Cartoon' ? '🎨' : book.style === 'Watercolor' ? '🌈' : book.style === '3D' ? '🧩' : '🎭'}</div>
+              )}
             </div>
             <div className="p-4 flex-1">
               <div className="flex justify-between items-start">

@@ -7,7 +7,7 @@ export const useStorageBucket = (bucketName: string) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkAndCreateBucket = async () => {
+    const checkBucket = async () => {
       try {
         // Check if bucket exists
         const { data: buckets, error: listError } = await supabase.storage.listBuckets();
@@ -18,18 +18,13 @@ export const useStorageBucket = (bucketName: string) => {
         
         const bucketExists = buckets.some(bucket => bucket.name === bucketName);
         
-        if (!bucketExists) {
-          // Create bucket if it doesn't exist
-          const { error: createError } = await supabase.storage.createBucket(bucketName, {
-            public: true, // Make bucket publicly accessible
-          });
-          
-          if (createError) {
-            throw createError;
-          }
+        if (bucketExists) {
+          setIsReady(true);
+        } else {
+          setError(`Bucket "${bucketName}" does not exist.`);
+          console.error(`Bucket "${bucketName}" does not exist.`);
+          setIsReady(false);
         }
-        
-        setIsReady(true);
       } catch (err: any) {
         console.error("Storage bucket error:", err);
         setError(err.message);
@@ -37,7 +32,7 @@ export const useStorageBucket = (bucketName: string) => {
       }
     };
 
-    checkAndCreateBucket();
+    checkBucket();
   }, [bucketName]);
 
   return { isReady, error };

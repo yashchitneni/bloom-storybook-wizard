@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
+import { uploadFile } from "@/utils/storage-utils";
 
 export const useWizardSubmission = (
   wizardData: WizardData,
@@ -31,21 +32,16 @@ export const useWizardSubmission = (
     try {
       let photoPath = null;
       
-      // Upload photo if available
+      // Upload photo if available using our new storage utility
       if (wizardData.photoFile) {
-        const fileExt = wizardData.photoFile.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const filePath = `uploads/${fileName}`;
+        photoPath = await uploadFile(wizardData.photoFile, {
+          folder: "uploads",
+          userId: user.id
+        });
         
-        const { error: uploadError } = await supabase.storage
-          .from('storybooks')
-          .upload(filePath, wizardData.photoFile);
-          
-        if (uploadError) {
-          throw new Error(`Error uploading image: ${uploadError.message}`);
+        if (!photoPath) {
+          throw new Error("Failed to upload photo");
         }
-        
-        photoPath = filePath;
       }
       
       // Create storybook entry using type assertion to bypass TypeScript errors
