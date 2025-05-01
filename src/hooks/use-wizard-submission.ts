@@ -49,9 +49,10 @@ export const useWizardSubmission = (
       }
       
       // Create storybook entry using type assertion to bypass TypeScript errors
-      // This works because we know our database has the storybooks table even if TypeScript doesn't
-      const { error: insertError } = await (supabase
-        .from('storybooks') as any)
+      // We need to cast the entire chain of methods to any
+      const client = supabase as any;
+      const { error: insertError } = await client
+        .from('storybooks')
         .insert([{
           user_id: user.id,
           email: wizardData.email || user.email,
