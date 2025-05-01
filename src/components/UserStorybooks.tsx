@@ -25,15 +25,21 @@ export const UserStorybooks = () => {
     if (user && isReady) {
       const fetchStorybooks = async () => {
         setIsLoading(true);
-        const { data, error } = await supabase
-          .from('storybooks')
-          .select('*')
-          .order('created_at', { ascending: false });
+        try {
+          // Use the any type to work around the type issues temporarily
+          // This will be properly typed when Supabase types are updated
+          const { data, error } = await (supabase as any)
+            .from('storybooks')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error("Error fetching storybooks:", error);
-        } else {
-          setStorybooks(data || []);
+          if (error) {
+            console.error("Error fetching storybooks:", error);
+          } else {
+            setStorybooks(data || []);
+          }
+        } catch (error) {
+          console.error("Error in fetchStorybooks:", error);
         }
         setIsLoading(false);
       };
