@@ -4,6 +4,10 @@ import Card from "./Card";
 import Button from "./Button";
 import ProgressBar from "./ProgressBar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 // Step 1: Age Selection Component
 const AgeSelectionStep = ({ onNext, onSelectAge, selectedAge }: { onNext: () => void, onSelectAge: (age: string) => void, selectedAge: string }) => {
@@ -240,7 +244,9 @@ const CheckoutStep = ({
   selectedStyle,
   specialDetails,
   onEmailChange,
-  email
+  email,
+  onSubmit,
+  isSubmitting
 }: { 
   onPrevious: () => void,
   selectedAge: string,
@@ -249,7 +255,9 @@ const CheckoutStep = ({
   selectedStyle: string,
   specialDetails: string,
   onEmailChange: (email: string) => void,
-  email: string
+  email: string,
+  onSubmit: () => void,
+  isSubmitting: boolean
 }) => {
   return (
     <div className="space-y-6">
@@ -285,8 +293,10 @@ const CheckoutStep = ({
       
       <Button 
         className="w-full py-3 text-center"
+        onClick={onSubmit}
+        disabled={isSubmitting}
       >
-        <span className="mr-2">🔒</span> Checkout
+        <span className="mr-2">🔒</span> {isSubmitting ? "Processing..." : "Checkout"}
       </Button>
       
       <p className="text-xs text-center text-gray-500">
@@ -294,7 +304,7 @@ const CheckoutStep = ({
       </p>
       
       <div className="flex justify-start pt-4">
-        <Button variant="outline" onClick={onPrevious}>
+        <Button variant="outline" onClick={onPrevious} disabled={isSubmitting}>
           <ChevronLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
@@ -316,6 +326,9 @@ const Wizard = () => {
     style: "",
     email: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   
   const totalSteps = 4;
   
@@ -356,6 +369,97 @@ const Wizard = () => {
     };
     reader.readAsDataURL(file);
   };
+
+  const handleSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please sign in to create your storybook",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      let photoPath = null;
+      
+      // Upload photo if available
+      if (wizardData.photoFile) {
+        const fileExt = wizardData.photoFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `uploads/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('storybooks')
+          .upload(filePath, wizardData.photoFile);
+          
+        if (uploadError) {
+          throw new Error(`Error uploading image: ${uploadError.message}`);
+        }
+        
+        photoPath = filePath;
+      }
+      
+      // Create storybook entry
+      const { error: insertError } = await supabase
+        .from('storybooks')
+        .insert([{
+          user_id: user.id,
+          email: wizardData.email || user.email,
+          child_name: "Child", // This should be collected from the user
+          age_range: wizardData.age,
+          theme: wizardData.theme,
+          moral: wizardData.moral,
+          style: wizardData.style,
+          note: wizardData.specialDetails,
+          photo_path: photoPath,
+        }]);
+        
+      if (insertError) {
+        throw new Error(`Error saving storybook: ${insertError.message}`);
+      }
+      
+      toast({
+        title: "Success!",
+        description: "Your storybook has been submitted and is now being created.",
+      });
+      
+      // Reset form after successful submission
+      setWizardData({
+        age: "",
+        theme: "",
+        moral: "",
+        specialDetails: "",
+        photoFile: null,
+        photoPreview: null,
+        style: "",
+        email: user.email || ""
+      });
+      setCurrentStep(1);
+    } catch (error: any) {
+      console.error("Error creating storybook:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Pre-fill email from user if authenticated
+  useEffect(() => {
+    if (user?.email && !wizardData.email) {
+      setWizardData(prev => ({
+        ...prev,
+        email: user.email || ""
+      }));
+    }
+  }, [user]);
   
   return (
     <Card className="max-w-2xl mx-auto" id="wizard">
@@ -409,6 +513,8 @@ const Wizard = () => {
               specialDetails={wizardData.specialDetails}
               onEmailChange={(email) => setWizardData({...wizardData, email})}
               email={wizardData.email}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
             />
           )}
         </div>
