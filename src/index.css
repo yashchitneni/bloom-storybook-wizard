@@ -60,3 +60,20 @@
 .wizard-progress-bar {
   @apply h-2 bg-mint rounded-full transition-all duration-300 ease-out;
 }
+
+.roadmap-tooltip {
+  @apply absolute -top-8 left-1/2 -translate-x-1/2 bg-darkText text-white text-xs py-1 px-2 rounded opacity-0 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50;
+}
+
+.roadmap-step:hover .roadmap-tooltip {
+  @apply opacity-100;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse-subtle {
+  animation: pulse-subtle 2s infinite;
+}
