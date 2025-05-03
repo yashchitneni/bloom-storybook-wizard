@@ -66,9 +66,9 @@ const ImageComparison = ({
       <div className="relative h-full w-full">
         <div className="h-full w-full">
           <img
-            src={afterImage}
+            src={beforeImage}
             className="h-full w-full object-cover"
-            alt="After transformation"
+            alt="Before transformation"
           />
         </div>
         <div
@@ -76,9 +76,9 @@ const ImageComparison = ({
           style={{ width: `${position}%` }}
         >
           <img
-            src={beforeImage}
+            src={afterImage}
             className="h-full w-full object-cover"
-            alt="Before transformation"
+            alt="After transformation"
           />
         </div>
         <div
