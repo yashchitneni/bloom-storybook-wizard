@@ -17,9 +17,9 @@ const TransformVisual: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
   
-  // Original photo appears on the left (firstImage), storybook character on the right (secondImage)
-  const originalPhotoUrl = "/lovable-uploads/14e7ca41-a4ca-4ade-8f9c-6b539eeedd03.png";
+  // Storybook character appears on the left (firstImage), original photo on the right (secondImage)
   const storybookCharacterUrl = "/lovable-uploads/499fd9c6-b707-4bc4-a99a-1b60715c2453.png";
+  const originalPhotoUrl = "/lovable-uploads/14e7ca41-a4ca-4ade-8f9c-6b539eeedd03.png";
 
   return (
     <section className="py-12 bg-white">
@@ -38,8 +38,8 @@ const TransformVisual: React.FC = () => {
           <Card className="overflow-hidden shadow-lg p-0">
             <div className="flex justify-center items-center p-4 bg-lightBg">
               <Compare
-                firstImage={originalPhotoUrl}
-                secondImage={storybookCharacterUrl}
+                firstImage={storybookCharacterUrl}
+                secondImage={originalPhotoUrl}
                 className="h-[400px] md:h-[500px] w-full rounded-lg"
                 firstImageClassName="object-contain"
                 secondImageClassname="object-contain"
@@ -51,13 +51,13 @@ const TransformVisual: React.FC = () => {
             <div className="p-6 bg-gradient-to-r from-mint/20 to-sunshine/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-lg">Original Photo</h4>
-                  <p className="text-gray-600 text-sm">Your child's picture</p>
+                  <h4 className="font-bold text-lg">Storybook Character</h4>
+                  <p className="text-gray-600 text-sm">Transformed illustration</p>
                 </div>
                 <ArrowRight className="text-persimmon mx-4" />
                 <div>
-                  <h4 className="font-bold text-lg">Storybook Character</h4>
-                  <p className="text-gray-600 text-sm">Transformed illustration</p>
+                  <h4 className="font-bold text-lg">Original Photo</h4>
+                  <p className="text-gray-600 text-sm">Your child's picture</p>
                 </div>
               </div>
             </div>
