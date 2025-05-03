@@ -5,7 +5,6 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Wizard from "@/components/Wizard";
-import TransformVisual from "@/components/TransformVisual";
 import StyleGallerySection from "@/components/StyleGallerySection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import FaqSection from "@/components/FaqSection";
@@ -20,7 +19,6 @@ const Index = () => {
       <Header />
       <main className="flex-grow">
         <HeroSection />
-        <TransformVisual />
         <div className="container mx-auto px-4 py-16">
           <Wizard />
         </div>
