@@ -45,6 +45,7 @@ const TransformVisual: React.FC = () => {
                 secondImageClassname="object-contain"
                 slideMode="drag"
                 showHandlebar={true}
+                autoplay={false}
               />
             </div>
             <div className="p-6 bg-gradient-to-r from-mint/20 to-sunshine/20">
