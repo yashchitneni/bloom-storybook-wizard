@@ -1,19 +1,18 @@
 
 import React, { useEffect } from 'react';
-import { motion } from "framer-motion";
 import { useWizardState } from '@/hooks/wizard/use-wizard-state';
-import AgeCard from '@/components/wizard/AgeCard';
-import ThemeCard from '@/components/wizard/ThemeCard';
-import SubjectCard from '@/components/wizard/SubjectCard';
-import MessageCard from '@/components/wizard/MessageCard';
-import CustomNoteCard from '@/components/wizard/CustomNoteCard';
-import StyleSelectionCard from '@/components/wizard/StyleSelectionCard';
-import ChildProfileCard from '@/components/wizard/ChildProfileCard';
-import CharactersCard from '@/components/wizard/CharactersCard';
-import PreviewCard from '@/components/wizard/PreviewCard';
-import CheckoutCard from '@/components/wizard/CheckoutCard';
+import AgeSelectionSection from '@/components/wizard/steps/AgeSelectionSection';
+import ThemeSelectionSection from '@/components/wizard/steps/ThemeSelectionSection';
+import SubjectSelectionSection from '@/components/wizard/steps/SubjectSelectionSection';
+import MessageSelectionSection from '@/components/wizard/steps/MessageSelectionSection';
+import CustomNoteSection from '@/components/wizard/steps/CustomNoteSection';
+import StyleSelectionSection from '@/components/wizard/steps/StyleSelectionSection';
+import ChildProfileSection from '@/components/wizard/steps/ChildProfileSection';
+import CharactersSection from '@/components/wizard/steps/CharactersSection';
+import PreviewSection from '@/components/wizard/steps/PreviewSection';
+import CheckoutSection from '@/components/wizard/steps/CheckoutSection';
+import ContinueButton from '@/components/wizard/steps/ContinueButton';
 import WizardRoadmap from "@/components/WizardRoadmap";
-import Button from "@/components/Button";
 
 interface WizardPageContentProps {
   isLoading: boolean;
@@ -77,14 +76,6 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
     setWizardData({ ...wizardData, email });
   };
 
-  const handleSelectMoral = (moral: string) => {
-    setWizardData({ ...wizardData, moral });
-  };
-
-  const handleSpecialDetailsChange = (specialDetails: string) => {
-    setWizardData({ ...wizardData, specialDetails });
-  };
-
   // Get available subjects for selected theme
   const availableSubjects = wizardData.theme ? subjects[wizardData.theme] || [] : [];
   
@@ -94,6 +85,20 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
     wizardData.childGender && 
     wizardData.childPhotoPreview
   );
+
+  // Handle continue button click
+  const handleContinueClick = () => {
+    const nextEmptyStep = !wizardData.age ? 1 : 
+                        !wizardData.theme ? 2 : 
+                        !wizardData.subject ? 3 : 
+                        !wizardData.message ? 4 :
+                        !wizardData.style ? 6 :
+                        !isChildProfileComplete ? 7 : 8;
+    const element = document.getElementById(`step-${nextEmptyStep}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   // Scroll to the newly revealed section when currentStep changes
   useEffect(() => {
@@ -125,219 +130,110 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
       
       <div className="space-y-12">
         {/* Age Selection Section */}
-        <motion.section 
-          id="step-1" 
-          className="space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h3 className="text-xl font-bold">Choose the Age Category</h3>
-          <AgeCard 
-            onSelectAge={handleSelectAge}
-            selectedAge={wizardData.age}
-            ageCategories={ageCategories}
-            isActive={true}
-          />
-        </motion.section>
+        <AgeSelectionSection
+          onSelectAge={handleSelectAge}
+          selectedAge={wizardData.age}
+          ageCategories={ageCategories}
+          isActive={true}
+        />
 
         {/* Theme Selection - Show if age is selected */}
         {wizardData.age && (
-          <motion.section 
-            id="step-2"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Choose a Theme</h3>
-            <ThemeCard
-              onSelectTheme={handleSelectTheme}
-              selectedTheme={wizardData.theme}
-              themes={themes}
-              isActive={true}
-            />
-          </motion.section>
+          <ThemeSelectionSection
+            onSelectTheme={handleSelectTheme}
+            selectedTheme={wizardData.theme}
+            themes={themes}
+            isActive={true}
+          />
         )}
 
         {/* Subject Selection - Show if theme is selected */}
         {wizardData.theme && (
-          <motion.section 
-            id="step-3"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Choose a Subject</h3>
-            <SubjectCard
-              onSelectSubject={handleSelectSubject}
-              selectedTheme={wizardData.theme}
-              selectedSubject={wizardData.subject}
-              subjects={availableSubjects}
-              isActive={true}
-            />
-          </motion.section>
+          <SubjectSelectionSection
+            onSelectSubject={handleSelectSubject}
+            selectedTheme={wizardData.theme}
+            selectedSubject={wizardData.subject}
+            subjects={availableSubjects}
+            isActive={true}
+          />
         )}
 
         {/* Message Selection - Show if subject is selected */}
         {wizardData.subject && (
-          <motion.section 
-            id="step-4"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">What's the central message of the story?</h3>
-            <MessageCard
-              onSelectMessage={handleSelectMessage}
-              selectedMessage={wizardData.message}
-              messages={messages}
-              isActive={true}
-            />
-          </motion.section>
+          <MessageSelectionSection
+            onSelectMessage={handleSelectMessage}
+            selectedMessage={wizardData.message}
+            messages={messages}
+            isActive={true}
+          />
         )}
 
         {/* Custom Note - Show if message is selected */}
         {wizardData.message && (
-          <motion.section 
-            id="step-5"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Add a personal note</h3>
-            <CustomNoteCard
-              onCustomNoteChange={handleCustomNoteChange}
-              customNote={wizardData.customNote}
-              isActive={true}
-            />
-          </motion.section>
+          <CustomNoteSection
+            onCustomNoteChange={handleCustomNoteChange}
+            customNote={wizardData.customNote}
+            isActive={true}
+          />
         )}
 
         {/* Style Selection - Show after personal note */}
         {wizardData.message && (
-          <motion.section 
-            id="step-6"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Choose Illustration Style</h3>
-            <StyleSelectionCard
-              onSelectStyle={handleSelectStyle}
-              selectedStyle={wizardData.style}
-              styles={styles}
-              isActive={true}
-            />
-          </motion.section>
+          <StyleSelectionSection
+            onSelectStyle={handleSelectStyle}
+            selectedStyle={wizardData.style}
+            styles={styles}
+            isActive={true}
+          />
         )}
         
         {/* Child Profile - Show if style is selected */}
         {wizardData.style && (
-          <motion.section 
-            id="step-7"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Your Child</h3>
-            <ChildProfileCard
-              onChildNameChange={handleChildNameChange}
-              onChildGenderChange={handleChildGenderChange}
-              onChildPhotoUpload={handleChildPhotoUpload}
-              childName={wizardData.childName}
-              childGender={wizardData.childGender}
-              childPhotoPreview={wizardData.childPhotoPreview}
-              isActive={true}
-            />
-          </motion.section>
+          <ChildProfileSection
+            onChildNameChange={handleChildNameChange}
+            onChildGenderChange={handleChildGenderChange}
+            onChildPhotoUpload={handleChildPhotoUpload}
+            childName={wizardData.childName}
+            childGender={wizardData.childGender}
+            childPhotoPreview={wizardData.childPhotoPreview}
+            isActive={true}
+          />
         )}
         
         {/* Additional Characters - Show if child profile is complete */}
         {wizardData.style && isChildProfileComplete && (
-          <motion.section 
-            id="step-8"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Additional Characters</h3>
-            <CharactersCard
-              characters={wizardData.characters}
-              onAddCharacter={handleAddCharacter}
-              onUpdateCharacter={handleUpdateCharacter}
-              onRemoveCharacter={handleRemoveCharacter}
-              isActive={true}
-              maxCharacters={4}
-            />
-          </motion.section>
+          <CharactersSection
+            characters={wizardData.characters}
+            onAddCharacter={handleAddCharacter}
+            onUpdateCharacter={handleUpdateCharacter}
+            onRemoveCharacter={handleRemoveCharacter}
+            isActive={true}
+            maxCharacters={4}
+          />
         )}
 
         {/* Preview - Show if child profile is complete */}
         {wizardData.style && isChildProfileComplete && (
-          <motion.section 
-            id="step-9"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Preview Your Story</h3>
-            <PreviewCard
-              wizardData={wizardData}
-              isActive={true}
-            />
-          </motion.section>
+          <PreviewSection
+            wizardData={wizardData}
+            isActive={true}
+          />
         )}
 
         {/* Checkout - Show if preview is completed */}
         {wizardData.style && isChildProfileComplete && (
-          <motion.section 
-            id="step-10"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Complete Your Order</h3>
-            <CheckoutCard
-              wizardData={wizardData}
-              onEmailChange={handleEmailChange}
-              onSubmit={handleSubmit}
-              isSubmitting={isSubmitting}
-              isActive={true}
-            />
-          </motion.section>
+          <CheckoutSection
+            wizardData={wizardData}
+            onEmailChange={handleEmailChange}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            isActive={true}
+          />
         )}
         
         {/* Final call to action if not all fields completed */}
         {(!wizardData.age || !wizardData.theme || !isChildProfileComplete) && (
-          <div className="flex justify-center pt-8">
-            <Button 
-              onClick={() => {
-                const nextEmptyStep = !wizardData.age ? 1 : 
-                                    !wizardData.theme ? 2 : 
-                                    !wizardData.subject ? 3 : 
-                                    !wizardData.message ? 4 :
-                                    !wizardData.style ? 6 :
-                                    !isChildProfileComplete ? 7 : 8;
-                const element = document.getElementById(`step-${nextEmptyStep}`);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }}
-              size="lg"
-              withArrow
-            >
-              Continue
-            </Button>
-          </div>
+          <ContinueButton onClick={handleContinueClick} />
         )}
       </div>
     </div>

@@ -109,9 +109,10 @@ export const useWizardSubmission = (
           p_photo_url: characterPhotoUrl
         };
 
+        // Fix the typing issue by using a proper type assertion
         const { error: characterInsertError } = await supabase.rpc(
-          'insert_character' as any,
-          params as any
+          'insert_character',
+          params
         );
 
         if (characterInsertError) {
