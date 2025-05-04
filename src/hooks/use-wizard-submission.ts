@@ -34,7 +34,7 @@ export const useWizardSubmission = (
       let childPhotoUrl = null;
       if (wizardData.childPhotoFile) {
         const childPhotoPath = `children/${wizardData.childName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
-        const { data: childUploadData, error: childUploadError } = await supabase.storage
+        const { data: childPhotoData, error: childUploadError } = await supabase.storage
           .from("uploads")
           .upload(childPhotoPath, wizardData.childPhotoFile);
 
@@ -92,17 +92,27 @@ export const useWizardSubmission = (
           characterPhotoUrl = characterPhotoPath;
         }
 
-        // Insert character record - using rpc call because the 'characters' table
-        // isn't in the TypeScript types yet
+        // Insert character record using rpc call
+        // Define the parameters type to match the expected structure
+        interface InsertCharacterParams {
+          p_storybook_id: string;
+          p_name: string;
+          p_relation: string;
+          p_gender: string;
+          p_photo_url: string | null;
+        }
+
+        const params: InsertCharacterParams = {
+          p_storybook_id: storybookId,
+          p_name: character.name,
+          p_relation: character.relation,
+          p_gender: character.gender,
+          p_photo_url: characterPhotoUrl
+        };
+
         const { error: characterInsertError } = await supabase.rpc(
           'insert_character',
-          {
-            p_storybook_id: storybookId,
-            p_name: character.name,
-            p_relation: character.relation,
-            p_gender: character.gender,
-            p_photo_url: characterPhotoUrl
-          } as any // Use type assertion to bypass TypeScript error
+          params
         );
 
         if (characterInsertError) {
