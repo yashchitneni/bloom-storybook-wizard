@@ -64,7 +64,7 @@ const FaqSection = () => {
     },
     {
       question: "Are books available in languages other than English?",
-      answer: "Currently, we offer storybooks in English, Spanish, and French. More languages will be added soon based on customer requests."
+      answer: "Currently, we offer storybooks in English only. More languages will be added soon based on customer requests."
     },
     {
       question: "Who owns the copyright to my child's storybook?",
