@@ -91,17 +91,16 @@ export const useWizardSubmission = (
           characterPhotoUrl = characterPhotoPath;
         }
 
-        // Fixed: Explicitly type the parameters as a record to match what the RPC function expects
-        const { error: characterInsertError } = await supabase.rpc(
-          'insert_character',
-          {
-            p_storybook_id: storybookId,
-            p_name: character.name,
-            p_relation: character.relation,
-            p_gender: character.gender,
-            p_photo_url: characterPhotoUrl
-          } as Record<string, any>
-        );
+        // Using direct insert instead of RPC function
+        const { error: characterInsertError } = await supabase
+          .from("characters")
+          .insert({
+            storybook_id: storybookId,
+            name: character.name,
+            relation: character.relation,
+            gender: character.gender,
+            photo_url: characterPhotoUrl
+          });
 
         if (characterInsertError) {
           console.error(`Character insert failed: ${characterInsertError.message}`);
