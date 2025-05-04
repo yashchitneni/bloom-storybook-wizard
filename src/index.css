@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fredoka+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fredoka+One&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -55,6 +55,14 @@
   .hover-lift {
     @apply transition-transform duration-200 hover:scale-105;
   }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 .wizard-progress-bar {
@@ -76,4 +84,28 @@
 
 .pulse-subtle {
   animation: pulse-subtle 2s infinite;
+}
+
+/* Book wizard styles */
+.book-page {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.page-flip {
+  transform-origin: center left;
+  transition: all 0.4s ease-out;
+}
+
+.page-curl {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 30px;
+  background: linear-gradient(to left, rgba(0,0,0,0.05), transparent);
+}
+
+.serif-text {
+  font-family: 'Playfair Display', serif;
 }
