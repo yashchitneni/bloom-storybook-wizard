@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fredoka+One&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fredoka+One&family=Playfair+Display:wght@400;500;600;700;400i;500i&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -63,6 +63,15 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .perspective {
+    perspective: 2000px;
+  }
+
+  .book-page {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
 }
 
 .wizard-progress-bar {
@@ -87,23 +96,46 @@
 }
 
 /* Book wizard styles */
-.book-page {
-  perspective: 1000px;
-  transform-style: preserve-3d;
+.book-header {
+  @apply sticky top-0 z-10 p-4 flex justify-between items-center border-b border-[#FEF6EC] bg-[#FFF9F2];
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-.page-flip {
-  transform-origin: center left;
-  transition: all 0.4s ease-out;
+.book-footer {
+  @apply sticky bottom-0 z-10 p-6 border-t border-[#FEF6EC] flex justify-center bg-[#FFF9F2];
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.02);
 }
 
-.page-curl {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 30px;
-  background: linear-gradient(to left, rgba(0,0,0,0.05), transparent);
+.page-number {
+  @apply font-serif italic text-sm text-gray-600;
+  font-family: 'Playfair Display', serif;
+}
+
+.selection-card {
+  @apply relative flex flex-col items-center justify-center p-4 rounded-xl text-center
+    transition-all duration-200 cursor-pointer border-2 border-gray-200 bg-white;
+}
+
+.selection-card:hover, .selection-card:focus-visible {
+  @apply transform -translate-y-1 shadow-md border-persimmon/50;
+}
+
+.selection-card.selected {
+  @apply bg-persimmon/10 border-persimmon shadow-lg;
+}
+
+/* Gender selection buttons */
+.gender-button {
+  @apply relative flex flex-col items-center justify-center p-4 rounded-xl 
+    border-2 transition-all duration-200 cursor-pointer text-center;
+}
+
+.gender-button:hover, .gender-button:focus-visible {
+  @apply transform -translate-y-1 shadow-md border-persimmon/50;
+}
+
+.gender-button.selected {
+  @apply bg-persimmon/10 border-persimmon shadow-lg;
 }
 
 .serif-text {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,9 @@ export const useWizardState = () => {
     style: "",
     email: "",
     moral: "",
-    specialDetails: ""
+    specialDetails: "",
+    childName: "",
+    gender: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [themes, setThemes] = useState<string[]>([]);
@@ -26,7 +29,7 @@ export const useWizardState = () => {
   const [ageCategories, setAgeCategories] = useState<string[]>([]);
   const { user } = useAuth();
   
-  const totalSteps = 8;
+  const totalSteps = 7; // Updated to include child information step
   
   // Load lookup data from Supabase
   useEffect(() => {

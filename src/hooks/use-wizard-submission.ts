@@ -80,6 +80,8 @@ export const useWizardSubmission = (
           special_details: wizardData.specialDetails,
           style: wizardData.style,
           photo_url: photoPath,
+          child_name: wizardData.childName,
+          gender: wizardData.gender
         })
         .select()
         .single();

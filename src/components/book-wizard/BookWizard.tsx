@@ -1,17 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, Book } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import { useWizardState } from '@/hooks/use-wizard-state';
 import { useWizardSubmission } from '@/hooks/use-wizard-submission';
 import Button from "@/components/Button";
 import WizardPage from './WizardPage';
+import PageFlip from './PageFlip';
 import AgeSelectionContent from './AgeSelectionContent';
 import ThemeSelectionContent from './ThemeSelectionContent';
 import SubjectSelectionContent from './SubjectSelectionContent';
 import MessageSelectionContent from './MessageSelectionContent';
 import StyleSelectionContent from './StyleSelectionContent';
+import ChildInfoContent from './ChildInfoContent';
 import CustomNoteContent from './CustomNoteContent';
 import ReviewContent from './ReviewContent';
 
@@ -42,7 +44,7 @@ export const BookWizard = () => {
     user
   );
 
-  const totalPages = 6;
+  const totalPages = 7; // Updated to include child information page
 
   // Handlers for each step
   const handleSelectAge = (age: string) => {
@@ -65,6 +67,15 @@ export const BookWizard = () => {
     setWizardData({ ...wizardData, style });
   };
 
+  const handleChildInfoChange = (info: { name: string; gender: string; photo?: File }) => {
+    setWizardData({
+      ...wizardData,
+      childName: info.name,
+      gender: info.gender,
+      photoFile: info.photo || wizardData.photoFile
+    });
+  };
+
   const handleCustomNoteChange = (customNote: string) => {
     setWizardData({ ...wizardData, customNote });
   };
@@ -78,25 +89,30 @@ export const BookWizard = () => {
 
   // Navigation functions
   const goToNextPage = () => {
-    if (currentPage < totalPages) {
+    if (currentPage < totalPages && !pageFlipping) {
       setPageFlipping(true);
       setDirection('next');
       setTimeout(() => {
         setCurrentPage(prev => prev + 1);
         setPageFlipping(false);
-      }, 400); // Match the animation duration
+      }, 500); // Match the animation duration
     }
   };
   
   const goToPrevPage = () => {
-    if (currentPage > 1) {
+    if (currentPage > 1 && !pageFlipping) {
       setPageFlipping(true);
       setDirection('prev');
       setTimeout(() => {
         setCurrentPage(prev => prev - 1);
         setPageFlipping(false);
-      }, 400); // Match the animation duration
+      }, 500); // Match the animation duration
     }
+  };
+
+  // Handle animation completion
+  const handleAnimationComplete = () => {
+    // Additional actions after animation completes if needed
   };
 
   // Check if next is available based on current selections
@@ -107,7 +123,8 @@ export const BookWizard = () => {
       case 3: return !!wizardData.subject;
       case 4: return !!wizardData.message;
       case 5: return !!wizardData.style;
-      case 6: return true; // Custom note is optional
+      case 6: return !!wizardData.childName && !!wizardData.gender; // New check for child info
+      case 7: return true; // Custom note is optional
       default: return false;
     }
   };
@@ -116,47 +133,49 @@ export const BookWizard = () => {
     handleSubmit();
   };
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' && isNextAvailable() && !pageFlipping) {
+        goToNextPage();
+      } else if (e.key === 'ArrowLeft' && currentPage > 1 && !pageFlipping) {
+        goToPrevPage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage, isNextAvailable, pageFlipping]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[90vh] bg-[#FEF6EC] py-4">
       <div className="w-full max-w-[700px] rounded-2xl overflow-hidden shadow-lg bg-[#FFF9F2] mx-auto relative">
         {/* Book header with navigation */}
-        <div className="p-4 flex justify-between items-center border-b border-gray-200">
+        <div className="book-header">
           <button 
             onClick={goToPrevPage} 
             disabled={currentPage === 1 || pageFlipping}
-            className="text-gray-700 hover:text-[#FF7A50] disabled:opacity-30 disabled:cursor-not-allowed text-2xl transition-colors"
+            className="flex items-center text-gray-700 hover:text-persimmon disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             aria-label="Go back"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} />
+            <span className="ml-1 text-sm font-medium">Back</span>
           </button>
           
-          <p className="font-serif text-sm">Page {currentPage} of {totalPages}</p>
+          <div className="flex items-center">
+            <Book size={16} className="text-gray-400 mr-2" />
+            <p className="page-number">Page {currentPage} of {totalPages}</p>
+          </div>
         </div>
 
         {/* Book content area */}
         <div className="relative overflow-hidden" style={{ minHeight: '500px' }}>
           <AnimatePresence mode="wait" initial={false}>
-            <motion.div
+            <PageFlip
               key={currentPage}
-              initial={{ 
-                opacity: 0,
-                x: direction === 'next' ? 300 : -300,
-                rotateY: direction === 'next' ? 45 : -45
-              }}
-              animate={{ 
-                opacity: 1,
-                x: 0,
-                rotateY: 0,
-                transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
-              }}
-              exit={{ 
-                opacity: 0,
-                x: direction === 'next' ? -300 : 300,
-                rotateY: direction === 'next' ? -45 : 45,
-                transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
-              }}
-              className="absolute w-full h-full"
-              style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
+              isFlipping={pageFlipping}
+              direction={direction}
+              onAnimationComplete={handleAnimationComplete}
             >
               <WizardPage>
                 {currentPage === 1 && (
@@ -199,8 +218,18 @@ export const BookWizard = () => {
                     styles={styles}
                   />
                 )}
-                
+
                 {currentPage === 6 && (
+                  <ChildInfoContent
+                    childName={wizardData.childName || ''}
+                    gender={wizardData.gender || ''}
+                    photoPreview={wizardData.photoPreview}
+                    onChildInfoChange={handleChildInfoChange}
+                    onPhotoUpload={handlePhotoUpload}
+                  />
+                )}
+                
+                {currentPage === 7 && (
                   <CustomNoteContent
                     customNote={wizardData.customNote || ''}
                     onCustomNoteChange={handleCustomNoteChange}
@@ -208,12 +237,12 @@ export const BookWizard = () => {
                   />
                 )}
               </WizardPage>
-            </motion.div>
+            </PageFlip>
           </AnimatePresence>
         </div>
         
         {/* Book footer with action buttons */}
-        <div className="p-6 border-t border-gray-200 flex justify-center">
+        <div className="book-footer">
           {currentPage === totalPages ? (
             <Button 
               onClick={handleFinalSubmit} 
@@ -236,11 +265,6 @@ export const BookWizard = () => {
             </Button>
           )}
         </div>
-
-        {/* Page curl effect overlay */}
-        {pageFlipping && (
-          <div className="absolute top-0 right-0 bottom-0 z-10 w-12 bg-gradient-to-l from-gray-300/50 to-transparent pointer-events-none"></div>
-        )}
       </div>
     </div>
   );
