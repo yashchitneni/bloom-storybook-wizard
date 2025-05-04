@@ -1,7 +1,7 @@
 
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
-import { baby } from "lucide-react";
+import { Baby } from "lucide-react";
 
 const Wizard = () => {
   const navigate = useNavigate();
