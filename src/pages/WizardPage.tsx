@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useWizardState } from '@/hooks/use-wizard-state';
@@ -14,9 +14,7 @@ import CustomNoteCard from '@/components/wizard/CustomNoteCard';
 import PhotoStyleCard from '@/components/wizard/PhotoStyleCard';
 import PreviewCard from '@/components/wizard/PreviewCard';
 import CheckoutCard from '@/components/wizard/CheckoutCard';
-import { toast } from "@/components/ui/use-toast";
 import WizardRoadmap from "@/components/WizardRoadmap";
-import Card from "@/components/Card";
 
 const WizardPage = () => {
   const {
@@ -224,8 +222,8 @@ const WizardPage = () => {
                 </motion.section>
               )}
 
-              {/* Photo & Style - Show if at least viewed custom note section */}
-              {((wizardData.customNote !== undefined) || wizardData.message) && (
+              {/* Photo & Style - Show ONLY if custom note is filled in */}
+              {wizardData.customNote && (
                 <motion.section 
                   id="step-6"
                   className="space-y-6"
@@ -245,7 +243,7 @@ const WizardPage = () => {
                 </motion.section>
               )}
 
-              {/* Photo & Style are completed */}
+              {/* Preview - Show if photo and style are completed */}
               {wizardData.photoPreview && wizardData.style && (
                 <motion.section 
                   id="step-7"
@@ -283,7 +281,7 @@ const WizardPage = () => {
               )}
               
               {/* Final call to action if not all fields completed */}
-              {(!wizardData.photoPreview || !wizardData.style) && (
+              {(!wizardData.age || !wizardData.theme) && (
                 <div className="flex justify-center pt-8">
                   <Button 
                     onClick={() => {

@@ -1,41 +1,58 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fredoka+One&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 33% 98%;
-    --foreground: 240 25% 15%;
-
+    --persimmon: #FF7043;
+    --sunshine: #FFE0A3;
+    --cream: #FFF8EE;
+    --darkText: #222A3F;
+    --lightText: #647387;
+    
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
-    --card-foreground: 240 25% 15%;
-
+    --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 25% 15%;
-
-    --primary: 14 100% 64%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 43 100% 70%;
-    --secondary-foreground: 240 25% 15%;
-
-    --muted: 171 68% 83%;
-    --muted-foreground: 240 10% 40%;
-
-    --accent: 171 68% 83%;
-    --accent-foreground: 240 25% 15%;
-
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 220.9 39.3% 11%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 220 13% 90%;
-    --input: 220 13% 90%;
-    --ring: 14 100% 64%;
-
-    --radius: 1rem;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71.4% 4.1%;
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 12.2% 83.9%;
   }
 }
 
@@ -44,36 +61,40 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-darkText font-inter;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-poppins font-bold;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer utilities {
+@layer components {
+  /* Background colors for soft palette */
+  .bg-soft-blue {
+    background-color: #D3E4FD;
+  }
+  .bg-soft-yellow {
+    background-color: #FEF7CD;
+  }
+  .bg-soft-green {
+    background-color: #F2FCE2;
+  }
+  .bg-soft-orange {
+    background-color: #FEC6A1;
+  }
+  .bg-soft-purple {
+    background-color: #E5DEFF;
+  }
+  .bg-soft-pink {
+    background-color: #FFDEE2;
+  }
+
+  .wizard-progress-bar {
+    @apply h-full bg-persimmon rounded-full transition-all duration-500 ease-out;
+  }
+  
   .hover-lift {
-    @apply transition-transform duration-200 hover:scale-105;
+    @apply transition-all duration-300;
   }
-}
-
-.wizard-progress-bar {
-  @apply h-2 bg-mint-500 rounded-full transition-all duration-300 ease-out;
-}
-
-.roadmap-tooltip {
-  @apply absolute -top-8 left-1/2 -translate-x-1/2 bg-darkText text-white text-xs py-1 px-2 rounded opacity-0 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50;
-}
-
-.roadmap-step:hover .roadmap-tooltip {
-  @apply opacity-100;
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.pulse-subtle {
-  animation: pulse-subtle 2s infinite;
+  
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
 }
