@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +29,8 @@ export const useWizardState = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   
-  const totalSteps = 8;
+  // Updated totalSteps to include the new split steps
+  const totalSteps = 9;
   
   // Load lookup data from Supabase
   useEffect(() => {

@@ -55,6 +55,11 @@ const StyleGallerySection = () => {
                   className="w-full h-full object-cover"
                 />
                 
+                {/* Style Label */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                  <p className="text-white font-bold">{style.name}</p>
+                </div>
+                
                 {/* Hover Overlay */}
                 <div className={`
                   absolute inset-0 bg-persimmon transition-all duration-300 flex items-center justify-center

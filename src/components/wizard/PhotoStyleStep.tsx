@@ -36,7 +36,8 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
   
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-bold">Upload Photo & Choose Style</h3>
+      {/* Only show photo upload step */}
+      <h3 className="text-xl font-bold">Upload Photo</h3>
       
       <div className="space-y-4">
         <label className="block text-sm font-medium">Upload a photo of your little hero</label>
@@ -74,51 +75,12 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
         </div>
       </div>
       
-      <div className="space-y-4">
-        <label className="block text-sm font-medium">Select an illustration style</label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {styles.map((style) => (
-            <div 
-              key={style}
-              onClick={() => onSelectStyle(style)}
-              className={`
-                aspect-[6/7] rounded-lg overflow-hidden cursor-pointer relative
-                transition-all duration-200 group
-                ${selectedStyle === style ? "ring-2 ring-persimmon ring-offset-2" : ""}
-              `}
-            >
-              <img 
-                src={getStyleImage(style)}
-                alt={`${style} style`}
-                className="w-full h-full object-cover"
-              />
-              <div className={`
-                absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 
-                flex items-center justify-center transition-all duration-200
-                ${selectedStyle === style ? 'bg-opacity-10' : ''}
-              `}>
-                <span className={`
-                  text-white opacity-0 group-hover:opacity-100 font-bold
-                  ${selectedStyle === style ? 'opacity-100' : ''}
-                `}>
-                  {selectedStyle === style ? 'Selected' : 'Select'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={onPrevious}>
           <ChevronLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <Button 
-          onClick={onNext} 
-          disabled={!photoPreview || !selectedStyle} 
-          withArrow
-        >
+        <Button onClick={onNext} withArrow>
           Next
         </Button>
       </div>

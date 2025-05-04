@@ -63,6 +63,21 @@ export interface CustomNoteStepProps {
   customNote: string;
 }
 
+export interface PhotoStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  onPhotoUpload: (file: File) => void;
+  photoPreview: string | null;
+}
+
+export interface StyleSelectionStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  onSelectStyle: (style: string) => void;
+  selectedStyle: string;
+  styles: string[];
+}
+
 export interface PhotoStyleStepProps {
   onNext: () => void;
   onPrevious: () => void;

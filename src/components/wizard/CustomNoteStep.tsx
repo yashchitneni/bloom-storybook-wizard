@@ -3,6 +3,7 @@ import React from 'react';
 import Button from "../Button";
 import { CustomNoteStepProps } from "@/types/wizard";
 import { ChevronLeft } from "lucide-react";
+import { Textarea } from "../ui/textarea";
 
 const CustomNoteStep: React.FC<CustomNoteStepProps> = ({ 
   onNext, 
@@ -18,15 +19,17 @@ const CustomNoteStep: React.FC<CustomNoteStepProps> = ({
         <p className="text-gray-600">
           Add a dedication, special message, or details you'd like included in the story.
         </p>
-        <textarea
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-persimmon min-h-[120px]"
-          placeholder="Write a personal note or dedication... (optional)"
-          maxLength={300}
-          value={customNote}
-          onChange={(e) => onCustomNoteChange(e.target.value)}
-        />
-        <div className="text-xs text-right text-gray-500">
-          {customNote.length}/300 characters
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-[#F8A982]/30">
+          <Textarea
+            className="w-full p-3 border border-[#F8A982] rounded-lg focus:outline-none focus:ring-2 focus:ring-persimmon min-h-[120px] bg-white"
+            placeholder="Write a personal note or dedication... (optional)"
+            maxLength={300}
+            value={customNote}
+            onChange={(e) => onCustomNoteChange(e.target.value)}
+          />
+          <div className="text-xs text-right text-gray-500 mt-2">
+            {customNote.length}/300 characters
+          </div>
         </div>
       </div>
       

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,6 +11,7 @@ import SubjectCard from '@/components/wizard/SubjectCard';
 import MessageCard from '@/components/wizard/MessageCard';
 import CustomNoteCard from '@/components/wizard/CustomNoteCard';
 import PhotoStyleCard from '@/components/wizard/PhotoStyleCard';
+import StyleSelectionCard from '@/components/wizard/StyleSelectionCard';
 import PreviewCard from '@/components/wizard/PreviewCard';
 import CheckoutCard from '@/components/wizard/CheckoutCard';
 import WizardRoadmap from "@/components/WizardRoadmap";
@@ -222,8 +222,8 @@ const WizardPage = () => {
                 </motion.section>
               )}
 
-              {/* Photo & Style - Show ONLY if custom note is filled in */}
-              {wizardData.customNote && (
+              {/* Photo Upload - Show if message is selected (custom note is optional) */}
+              {wizardData.message && (
                 <motion.section 
                   id="step-6"
                   className="space-y-6"
@@ -231,22 +231,38 @@ const WizardPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                  <h3 className="text-xl font-bold">Upload Photo & Choose Style</h3>
+                  <h3 className="text-xl font-bold">Upload Photo</h3>
                   <PhotoStyleCard
-                    onSelectStyle={handleSelectStyle}
-                    selectedStyle={wizardData.style}
                     onPhotoUpload={handlePhotoUpload}
                     photoPreview={wizardData.photoPreview}
+                    isActive={true}
+                  />
+                </motion.section>
+              )}
+              
+              {/* Style Selection - Show if photo is completed or skipped (after message step) */}
+              {wizardData.message && (
+                <motion.section 
+                  id="step-7"
+                  className="space-y-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <h3 className="text-xl font-bold">Choose Illustration Style</h3>
+                  <StyleSelectionCard
+                    onSelectStyle={handleSelectStyle}
+                    selectedStyle={wizardData.style}
                     styles={styles}
                     isActive={true}
                   />
                 </motion.section>
               )}
 
-              {/* Preview - Show if photo and style are completed */}
-              {wizardData.photoPreview && wizardData.style && (
+              {/* Preview - Show if style is selected */}
+              {wizardData.style && (
                 <motion.section 
-                  id="step-7"
+                  id="step-8"
                   className="space-y-6"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -261,9 +277,9 @@ const WizardPage = () => {
               )}
 
               {/* Checkout - Show if preview is completed */}
-              {wizardData.photoPreview && wizardData.style && (
+              {wizardData.style && (
                 <motion.section 
-                  id="step-8"
+                  id="step-9"
                   className="space-y-6"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -288,8 +304,7 @@ const WizardPage = () => {
                       const nextEmptyStep = !wizardData.age ? 1 : 
                                           !wizardData.theme ? 2 : 
                                           !wizardData.subject ? 3 : 
-                                          !wizardData.message ? 4 : 
-                                          !wizardData.customNote ? 5 : 6;
+                                          !wizardData.message ? 4 : 5;
                       const element = document.getElementById(`step-${nextEmptyStep}`);
                       if (element) {
                         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
