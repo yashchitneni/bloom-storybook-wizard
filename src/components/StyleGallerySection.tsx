@@ -87,9 +87,10 @@ const StyleGallerySection = () => {
               variants={cardVariants}
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
+              className="h-full"
             >
               <div 
-                className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2"
+                className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer transition-transform duration-300 hover:-translate-y-2 flex flex-col h-full"
                 onMouseEnter={() => setHoveredStyle(index)}
                 onMouseLeave={() => setHoveredStyle(null)}
                 onClick={scrollToWizard}
@@ -118,7 +119,7 @@ const StyleGallerySection = () => {
                   </div>
                 </div>
                 
-                <div className="p-6 text-center">
+                <div className="p-6 text-center flex-grow flex flex-col justify-between">
                   <h3 className="font-bold mb-1 font-poppins">{style.name}</h3>
                   <p className="text-sm text-gray-600 font-lato">{style.description}</p>
                 </div>

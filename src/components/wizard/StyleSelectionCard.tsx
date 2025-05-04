@@ -49,7 +49,7 @@ const StyleSelectionCard: React.FC<StyleSelectionCardProps> = ({
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/60 to-transparent p-2">
-                <p className="text-white font-medium text-center">{style}</p>
+                <p className="text-white font-medium text-center truncate max-w-full">{style}</p>
               </div>
               <div className={`
                 absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 
