@@ -27,21 +27,30 @@ export const useWizardSubmission = (
       return;
     }
 
+    // Validate child profile
+    if (!wizardData.childName || !wizardData.childGender || !wizardData.childPhotoFile) {
+      toast({
+        title: "Missing information",
+        description: "Please complete the child profile before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmissionState(true);
 
     try {
-      let photoPath = null;
-      
-      // Upload photo if available
-      if (wizardData.photoFile) {
-        photoPath = await uploadFile(wizardData.photoFile, {
-          folder: "uploads",
+      // Upload child photo
+      let childPhotoPath = null;
+      if (wizardData.childPhotoFile) {
+        childPhotoPath = await uploadFile(wizardData.childPhotoFile, {
+          folder: "uploads/children",
           userId: user.id
         });
         
-        if (!photoPath) {
-          throw new Error("Failed to upload photo");
+        if (!childPhotoPath) {
+          throw new Error("Failed to upload child photo");
         }
       }
       
@@ -79,13 +88,53 @@ export const useWizardSubmission = (
           moral: wizardData.moral,
           special_details: wizardData.specialDetails,
           style: wizardData.style,
-          photo_url: photoPath,
+          child_name: wizardData.childName,
+          child_gender: wizardData.childGender,
+          child_photo_url: childPhotoPath
         })
         .select()
         .single();
         
       if (insertError) {
         throw new Error(`Error saving storybook: ${insertError.message}`);
+      }
+      
+      // Insert additional characters if any
+      if (wizardData.characters.length > 0) {
+        const charactersToInsert = [];
+        
+        for (const character of wizardData.characters) {
+          // Skip characters without name or relation
+          if (!character.name || !character.relation) continue;
+          
+          let photoUrl = null;
+          // Upload character photo if available
+          if (character.photoFile) {
+            photoUrl = await uploadFile(character.photoFile, {
+              folder: `uploads/characters/${storybook.id}`,
+              userId: user.id
+            });
+          }
+          
+          charactersToInsert.push({
+            storybook_id: storybook.id,
+            name: character.name,
+            relation: character.relation,
+            gender: character.gender || 'Other',
+            photo_url: photoUrl
+          });
+        }
+        
+        if (charactersToInsert.length > 0) {
+          const { error: charactersError } = await supabase
+            .from('characters')
+            .insert(charactersToInsert);
+            
+          if (charactersError) {
+            console.error("Error saving characters:", charactersError);
+            // Continue anyway as this is not critical
+          }
+        }
       }
       
       toast({

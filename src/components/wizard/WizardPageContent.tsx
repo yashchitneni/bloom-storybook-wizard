@@ -7,8 +7,9 @@ import ThemeCard from '@/components/wizard/ThemeCard';
 import SubjectCard from '@/components/wizard/SubjectCard';
 import MessageCard from '@/components/wizard/MessageCard';
 import CustomNoteCard from '@/components/wizard/CustomNoteCard';
-import PhotoStyleCard from '@/components/wizard/PhotoStyleCard';
 import StyleSelectionCard from '@/components/wizard/StyleSelectionCard';
+import ChildProfileCard from '@/components/wizard/ChildProfileCard';
+import CharactersCard from '@/components/wizard/CharactersCard';
 import PreviewCard from '@/components/wizard/PreviewCard';
 import CheckoutCard from '@/components/wizard/CheckoutCard';
 import WizardRoadmap from "@/components/WizardRoadmap";
@@ -26,6 +27,10 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
     setWizardData,
     isSubmitting,
     handlePhotoUpload,
+    handleChildPhotoUpload,
+    handleAddCharacter,
+    handleUpdateCharacter,
+    handleRemoveCharacter,
     themes,
     subjects,
     messages,
@@ -59,6 +64,14 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
   const handleSelectStyle = (style: string) => {
     setWizardData({ ...wizardData, style });
   };
+  
+  const handleChildNameChange = (childName: string) => {
+    setWizardData({ ...wizardData, childName });
+  };
+  
+  const handleChildGenderChange = (childGender: string) => {
+    setWizardData({ ...wizardData, childGender });
+  };
 
   const handleEmailChange = (email: string) => {
     setWizardData({ ...wizardData, email });
@@ -74,6 +87,13 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
 
   // Get available subjects for selected theme
   const availableSubjects = wizardData.theme ? subjects[wizardData.theme] || [] : [];
+  
+  // Check if child profile is complete
+  const isChildProfileComplete = (
+    wizardData.childName && 
+    wizardData.childGender && 
+    wizardData.childPhotoPreview
+  );
 
   // Scroll to the newly revealed section when currentStep changes
   useEffect(() => {
@@ -197,28 +217,10 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
           </motion.section>
         )}
 
-        {/* Photo Upload - Show if message is selected (custom note is optional) */}
+        {/* Style Selection - Show after personal note */}
         {wizardData.message && (
           <motion.section 
             id="step-6"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h3 className="text-xl font-bold">Upload Photo</h3>
-            <PhotoStyleCard
-              onPhotoUpload={handlePhotoUpload}
-              photoPreview={wizardData.photoPreview}
-              isActive={true}
-            />
-          </motion.section>
-        )}
-        
-        {/* Style Selection - Show if photo is completed or skipped (after message step) */}
-        {wizardData.message && (
-          <motion.section 
-            id="step-7"
             className="space-y-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -233,11 +235,54 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
             />
           </motion.section>
         )}
-
-        {/* Preview - Show if style is selected */}
+        
+        {/* Child Profile - Show if style is selected */}
         {wizardData.style && (
           <motion.section 
+            id="step-7"
+            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h3 className="text-xl font-bold">Your Child</h3>
+            <ChildProfileCard
+              onChildNameChange={handleChildNameChange}
+              onChildGenderChange={handleChildGenderChange}
+              onChildPhotoUpload={handleChildPhotoUpload}
+              childName={wizardData.childName}
+              childGender={wizardData.childGender}
+              childPhotoPreview={wizardData.childPhotoPreview}
+              isActive={true}
+            />
+          </motion.section>
+        )}
+        
+        {/* Additional Characters - Show if child profile is complete */}
+        {wizardData.style && isChildProfileComplete && (
+          <motion.section 
             id="step-8"
+            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h3 className="text-xl font-bold">Additional Characters</h3>
+            <CharactersCard
+              characters={wizardData.characters}
+              onAddCharacter={handleAddCharacter}
+              onUpdateCharacter={handleUpdateCharacter}
+              onRemoveCharacter={handleRemoveCharacter}
+              isActive={true}
+              maxCharacters={4}
+            />
+          </motion.section>
+        )}
+
+        {/* Preview - Show if child profile is complete */}
+        {wizardData.style && isChildProfileComplete && (
+          <motion.section 
+            id="step-9"
             className="space-y-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -252,9 +297,9 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
         )}
 
         {/* Checkout - Show if preview is completed */}
-        {wizardData.style && (
+        {wizardData.style && isChildProfileComplete && (
           <motion.section 
-            id="step-9"
+            id="step-10"
             className="space-y-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -272,14 +317,16 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
         )}
         
         {/* Final call to action if not all fields completed */}
-        {(!wizardData.age || !wizardData.theme) && (
+        {(!wizardData.age || !wizardData.theme || !isChildProfileComplete) && (
           <div className="flex justify-center pt-8">
             <Button 
               onClick={() => {
                 const nextEmptyStep = !wizardData.age ? 1 : 
                                     !wizardData.theme ? 2 : 
                                     !wizardData.subject ? 3 : 
-                                    !wizardData.message ? 4 : 5;
+                                    !wizardData.message ? 4 :
+                                    !wizardData.style ? 6 :
+                                    !isChildProfileComplete ? 7 : 8;
                 const element = document.getElementById(`step-${nextEmptyStep}`);
                 if (element) {
                   element.scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -1,4 +1,3 @@
-
 export interface WizardData {
   age: string;
   theme: string;
@@ -11,6 +10,24 @@ export interface WizardData {
   email: string;
   moral?: string;
   specialDetails?: string;
+  
+  // New fields for child profile
+  childName: string;
+  childGender: string;
+  childPhotoFile: File | null;
+  childPhotoPreview: string | null;
+  
+  // New fields for additional characters
+  characters: Character[];
+}
+
+export interface Character {
+  id: string;
+  name: string;
+  relation: string;
+  gender: string;
+  photoFile: File | null;
+  photoPreview: string | null;
 }
 
 export interface AgeSelectionStepProps {
@@ -100,4 +117,23 @@ export interface CheckoutStepProps {
   onEmailChange: (email: string) => void;
   onSubmit: () => void;
   isSubmitting: boolean;
+}
+
+export interface ChildProfileCardProps {
+  onChildNameChange: (name: string) => void;
+  onChildGenderChange: (gender: string) => void;
+  onChildPhotoUpload: (file: File) => void;
+  childName: string;
+  childGender: string;
+  childPhotoPreview: string | null;
+  isActive: boolean;
+}
+
+export interface CharactersCardProps {
+  characters: Character[];
+  onAddCharacter: () => void;
+  onUpdateCharacter: (id: string, field: string, value: any) => void;
+  onRemoveCharacter: (id: string) => void;
+  isActive: boolean;
+  maxCharacters?: number;
 }

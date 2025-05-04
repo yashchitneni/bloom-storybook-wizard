@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { WizardData } from "@/types/wizard";
+import { WizardData, Character } from "@/types/wizard";
 import { toast } from "@/components/ui/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 export const useWizardState = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -18,7 +19,16 @@ export const useWizardState = () => {
     style: "",
     email: "",
     moral: "",
-    specialDetails: ""
+    specialDetails: "",
+    
+    // New child profile fields
+    childName: "",
+    childGender: "",
+    childPhotoFile: null,
+    childPhotoPreview: null,
+    
+    // Characters
+    characters: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [themes, setThemes] = useState<string[]>([]);
@@ -188,6 +198,80 @@ export const useWizardState = () => {
     };
     reader.readAsDataURL(file);
   };
+  
+  const handleChildPhotoUpload = (file: File) => {
+    if (file.size === 0) {
+      // User removed the photo
+      setWizardData({
+        ...wizardData,
+        childPhotoFile: null,
+        childPhotoPreview: null
+      });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setWizardData({
+        ...wizardData,
+        childPhotoFile: file,
+        childPhotoPreview: e.target?.result as string
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleAddCharacter = () => {
+    const newCharacter: Character = {
+      id: uuidv4(),
+      name: "",
+      relation: "",
+      gender: "",
+      photoFile: null,
+      photoPreview: null
+    };
+    
+    setWizardData({
+      ...wizardData,
+      characters: [...wizardData.characters, newCharacter]
+    });
+  };
+  
+  const handleUpdateCharacter = (id: string, field: string, value: any) => {
+    const updatedCharacters = wizardData.characters.map(character => {
+      if (character.id === id) {
+        if (field === "photoFile" && value instanceof File && value.size > 0) {
+          // Handle photo file upload
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            setWizardData(prev => ({
+              ...prev,
+              characters: prev.characters.map(c => 
+                c.id === id ? {...c, photoPreview: e.target?.result as string} : c
+              )
+            }));
+          };
+          reader.readAsDataURL(value);
+          
+          return { ...character, [field]: value };
+        }
+        return { ...character, [field]: value };
+      }
+      return character;
+    });
+    
+    setWizardData({
+      ...wizardData,
+      characters: updatedCharacters
+    });
+  };
+  
+  const handleRemoveCharacter = (id: string) => {
+    setWizardData({
+      ...wizardData,
+      characters: wizardData.characters.filter(character => character.id !== id)
+    });
+  };
 
   // Pre-fill email from user if authenticated
   useEffect(() => {
@@ -210,6 +294,10 @@ export const useWizardState = () => {
     handlePrevious,
     handleGoToStep,
     handlePhotoUpload,
+    handleChildPhotoUpload,
+    handleAddCharacter,
+    handleUpdateCharacter,
+    handleRemoveCharacter,
     themes,
     subjects,
     messages,

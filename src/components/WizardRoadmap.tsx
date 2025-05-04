@@ -1,7 +1,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { CakeIcon, BookIcon, PencilIcon, MessageSquareIcon, ImageIcon, CameraIcon, ShoppingCartIcon } from "lucide-react";
+import { CakeIcon, BookIcon, PencilIcon, MessageSquareIcon, ImageIcon, User, UsersRound, ShoppingCartIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface WizardRoadmapProps {
@@ -35,17 +35,21 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
   }, {
     id: 5,
     icon: PencilIcon,
-    label: "Custom Note"
+    label: "Personal Note"
   }, {
     id: 6,
     icon: ImageIcon,
-    label: "Photo & Style"
+    label: "Style"
   }, {
     id: 7,
-    icon: CameraIcon,
-    label: "Preview"
+    icon: User,
+    label: "Child Profile"
   }, {
     id: 8,
+    icon: UsersRound,
+    label: "Characters"
+  }, {
+    id: 9,
     icon: ShoppingCartIcon,
     label: "Checkout"
   }];
