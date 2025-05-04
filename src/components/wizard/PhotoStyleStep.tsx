@@ -1,10 +1,10 @@
 
 import React from 'react';
 import Button from "../Button";
-import { PhotoStyleSelectionStepProps } from "@/types/wizard";
+import { PhotoStyleStepProps } from "@/types/wizard";
 import { ChevronLeft } from "lucide-react";
 
-const PhotoStyleStep: React.FC<PhotoStyleSelectionStepProps> = ({ 
+const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({ 
   onNext, 
   onPrevious,
   onSelectStyle,

@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fredoka+One&family=Playfair+Display:wght@400;500;600;700;400i;500i&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fredoka+One&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -55,23 +55,6 @@
   .hover-lift {
     @apply transition-transform duration-200 hover:scale-105;
   }
-  
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .perspective {
-    perspective: 2000px;
-  }
-
-  .book-page {
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
-  }
 }
 
 .wizard-progress-bar {
@@ -93,51 +76,4 @@
 
 .pulse-subtle {
   animation: pulse-subtle 2s infinite;
-}
-
-/* Book wizard styles */
-.book-header {
-  @apply sticky top-0 z-10 p-4 flex justify-between items-center border-b border-[#FEF6EC] bg-[#FFF9F2];
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.book-footer {
-  @apply sticky bottom-0 z-10 p-6 border-t border-[#FEF6EC] flex justify-center bg-[#FFF9F2];
-  box-shadow: 0 -2px 4px rgba(0,0,0,0.02);
-}
-
-.page-number {
-  @apply font-serif italic text-sm text-gray-600;
-  font-family: 'Playfair Display', serif;
-}
-
-.selection-card {
-  @apply relative flex flex-col items-center justify-center p-4 rounded-xl text-center
-    transition-all duration-200 cursor-pointer border-2 border-gray-200 bg-white;
-}
-
-.selection-card:hover, .selection-card:focus-visible {
-  @apply transform -translate-y-1 shadow-md border-persimmon/50;
-}
-
-.selection-card.selected {
-  @apply bg-persimmon/10 border-persimmon shadow-lg;
-}
-
-/* Gender selection buttons */
-.gender-button {
-  @apply relative flex flex-col items-center justify-center p-4 rounded-xl 
-    border-2 transition-all duration-200 cursor-pointer text-center;
-}
-
-.gender-button:hover, .gender-button:focus-visible {
-  @apply transform -translate-y-1 shadow-md border-persimmon/50;
-}
-
-.gender-button.selected {
-  @apply bg-persimmon/10 border-persimmon shadow-lg;
-}
-
-.serif-text {
-  font-family: 'Playfair Display', serif;
 }
