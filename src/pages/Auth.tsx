@@ -20,20 +20,30 @@ const Auth = () => {
     navigate('/');
     return null;
   }
+  
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       if (isSignUp) {
-        // Sign up
+        // Sign up and automatically sign in the user
         const {
           data,
           error
         } = await supabase.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            // Skip email confirmation flow by auto-confirming email
+            emailRedirectTo: window.location.origin,
+            data: {
+              email_confirmed: true
+            }
+          }
         });
+        
         if (error) throw error;
+        
         if (data.user) {
           // Create user entry in our users table
           try {
@@ -42,14 +52,25 @@ const Auth = () => {
               id: data.user.id,
               email: data.user.email
             }]);
+            
+            // Automatically sign in the user after signup
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email,
+              password
+            });
+            
+            if (signInError) throw signInError;
+            
+            toast({
+              title: "Account created!",
+              description: "Welcome to StoryBloom!"
+            });
+            
+            navigate('/');
           } catch (err) {
             console.error("Error creating user entry:", err);
             // Continue anyway since the auth was successful
           }
-          toast({
-            title: "Account created!",
-            description: "Welcome to StoryBloom!"
-          });
         }
       } else {
         // Sign in
@@ -64,8 +85,8 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You're now signed in."
         });
+        navigate('/');
       }
-      navigate('/');
     } catch (error: any) {
       toast({
         title: "Authentication error",
@@ -76,6 +97,7 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+  
   return <div className="min-h-screen bg-select flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
