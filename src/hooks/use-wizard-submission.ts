@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { WizardData } from "@/types/wizard";
 import { useNavigate } from "react-router-dom";
+import { uploadFile } from "@/utils/storage-utils";
 
 export const useWizardSubmission = (
   wizardData: WizardData,
@@ -41,7 +42,7 @@ export const useWizardSubmission = (
           throw new Error(`Child photo upload failed: ${childUploadError.message}`);
         }
 
-        childPhotoUrl = childUploadPath;
+        childPhotoUrl = childPhotoPath;
       }
 
       // Insert storybook record
@@ -91,16 +92,15 @@ export const useWizardSubmission = (
           characterPhotoUrl = characterPhotoPath;
         }
 
-        // Insert character record
-        const { error: characterInsertError } = await supabase
-          .from("characters")
-          .insert({
-            storybook_id: storybookId,
-            name: character.name,
-            relation: character.relation,
-            gender: character.gender,
-            photo_url: characterPhotoUrl,
-          });
+        // Insert character record - using executeRaw because the 'characters' table
+        // isn't in the TypeScript types yet
+        const { error: characterInsertError } = await supabase.rpc('insert_character', {
+          p_storybook_id: storybookId,
+          p_name: character.name,
+          p_relation: character.relation,
+          p_gender: character.gender,
+          p_photo_url: characterPhotoUrl
+        });
 
         if (characterInsertError) {
           console.error(`Character insert failed: ${characterInsertError.message}`);
