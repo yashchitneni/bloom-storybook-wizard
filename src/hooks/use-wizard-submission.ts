@@ -1,164 +1,152 @@
 
 import { useState } from "react";
-import { WizardData } from "@/types/wizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { WizardData } from "@/types/wizard";
 import { useNavigate } from "react-router-dom";
-import { User } from "@supabase/supabase-js";
-import { uploadFile } from "@/utils/storage-utils";
 
 export const useWizardSubmission = (
   wizardData: WizardData,
-  setWizardData: (data: WizardData) => void,
-  setIsSubmitting: (isSubmitting: boolean) => void,
-  user: User | null
+  setWizardData: React.Dispatch<React.SetStateAction<WizardData>>,
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>,
+  user: any
 ) => {
   const navigate = useNavigate();
-  const [submissionState, setSubmissionState] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    if (!user) {
+    // Validation
+    if (!wizardData.email) {
       toast({
-        title: "Login required",
-        description: "Please sign in to create your storybook",
-        variant: "destructive",
-      });
-      navigate('/auth');
-      return;
-    }
-
-    // Validate child profile
-    if (!wizardData.childName || !wizardData.childGender || !wizardData.childPhotoFile) {
-      toast({
-        title: "Missing information",
-        description: "Please complete the child profile before submitting",
+        title: "Email required",
+        description: "Please enter your email to place your order.",
         variant: "destructive",
       });
       return;
     }
 
     setIsSubmitting(true);
-    setSubmissionState(true);
+    setError(null);
 
     try {
-      // Upload child photo
-      let childPhotoPath = null;
+      // Upload files if needed
+      let childPhotoUrl = null;
       if (wizardData.childPhotoFile) {
-        childPhotoPath = await uploadFile(wizardData.childPhotoFile, {
-          folder: "uploads/children",
-          userId: user.id
-        });
-        
-        if (!childPhotoPath) {
-          throw new Error("Failed to upload child photo");
+        const childPhotoPath = `children/${wizardData.childName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+        const { data: childUploadData, error: childUploadError } = await supabase.storage
+          .from("uploads")
+          .upload(childPhotoPath, wizardData.childPhotoFile);
+
+        if (childUploadError) {
+          throw new Error(`Child photo upload failed: ${childUploadError.message}`);
         }
+
+        childPhotoUrl = childUploadPath;
       }
-      
-      // Check if we have a profile for this user
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-      
-      // If no profile exists, create one
-      if (profileError && profileError.code === 'PGRST116') {
-        const { error: insertProfileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            email: wizardData.email || user.email
-          });
-          
-        if (insertProfileError) {
-          throw new Error(`Error creating profile: ${insertProfileError.message}`);
-        }
-      }
-      
-      // Create storybook entry
-      const { data: storybook, error: insertError } = await supabase
-        .from('storybooks')
+
+      // Insert storybook record
+      const { data: storybookData, error: storybookError } = await supabase
+        .from("storybooks")
         .insert({
-          author_id: user.id,
+          author_id: user?.id || null,
           age_category: wizardData.age,
           theme: wizardData.theme,
           subject: wizardData.subject,
           message: wizardData.message,
-          custom_note: wizardData.customNote,
-          moral: wizardData.moral,
-          special_details: wizardData.specialDetails,
+          custom_note: wizardData.customNote || null,
           style: wizardData.style,
           child_name: wizardData.childName,
           child_gender: wizardData.childGender,
-          child_photo_url: childPhotoPath
+          child_photo_url: childPhotoUrl,
         })
         .select()
         .single();
-        
-      if (insertError) {
-        throw new Error(`Error saving storybook: ${insertError.message}`);
+
+      if (storybookError) {
+        throw new Error(`Storybook creation failed: ${storybookError.message}`);
       }
-      
-      // Insert additional characters if any
-      if (wizardData.characters.length > 0) {
-        const charactersToInsert = [];
+
+      const storybookId = storybookData.id;
+
+      // Upload and associate character photos
+      for (const character of wizardData.characters) {
+        if (!character.name || !character.relation || !character.gender) {
+          console.warn("Skipping character with incomplete data:", character);
+          continue;
+        }
+
+        let characterPhotoUrl = null;
         
-        for (const character of wizardData.characters) {
-          // Skip characters without name or relation
-          if (!character.name || !character.relation) continue;
-          
-          let photoUrl = null;
-          // Upload character photo if available
-          if (character.photoFile) {
-            photoUrl = await uploadFile(character.photoFile, {
-              folder: `uploads/characters/${storybook.id}`,
-              userId: user.id
-            });
+        if (character.photoFile) {
+          const characterPhotoPath = `characters/${character.name.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+          const { data: characterUploadData, error: characterUploadError } = await supabase.storage
+            .from("uploads")
+            .upload(characterPhotoPath, character.photoFile);
+
+          if (characterUploadError) {
+            console.error(`Character photo upload failed: ${characterUploadError.message}`);
+            continue;
           }
-          
-          charactersToInsert.push({
-            storybook_id: storybook.id,
+
+          characterPhotoUrl = characterPhotoPath;
+        }
+
+        // Insert character record
+        const { error: characterInsertError } = await supabase
+          .from("characters")
+          .insert({
+            storybook_id: storybookId,
             name: character.name,
             relation: character.relation,
-            gender: character.gender || 'Other',
-            photo_url: photoUrl
+            gender: character.gender,
+            photo_url: characterPhotoUrl,
           });
-        }
-        
-        if (charactersToInsert.length > 0) {
-          const { error: charactersError } = await supabase
-            .from('characters')
-            .insert(charactersToInsert);
-            
-          if (charactersError) {
-            console.error("Error saving characters:", charactersError);
-            // Continue anyway as this is not critical
-          }
+
+        if (characterInsertError) {
+          console.error(`Character insert failed: ${characterInsertError.message}`);
         }
       }
-      
+
+      // Success toast
       toast({
-        title: "Success!",
-        description: "Your storybook has been submitted and is now being generated.",
+        title: "Order submitted successfully!",
+        description: "We'll start creating your personalized storybook right away.",
       });
-      
-      // Navigate to the storybook page
-      navigate(`/story/${storybook.id}`);
-      
-    } catch (error: any) {
-      console.error("Error creating storybook:", error);
+
+      // Reset wizard data
+      setWizardData({
+        age: "",
+        theme: "",
+        subject: "",
+        message: "",
+        customNote: "",
+        photoFile: null,
+        photoPreview: null,
+        style: "",
+        email: "",
+        moral: "",
+        specialDetails: "",
+        childName: "",
+        childGender: "",
+        childPhotoFile: null,
+        childPhotoPreview: null,
+        characters: []
+      });
+
+      // Navigate to success/thank you page or account page
+      navigate("/account");
+    } catch (err: any) {
+      console.error("Order submission error:", err);
+      setError(err.message);
       toast({
-        title: "Error",
-        description: error.message || "Something went wrong. Please try again.",
+        title: "Order submission failed",
+        description: err.message,
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
-      setSubmissionState(false);
     }
   };
 
-  return {
-    handleSubmit,
-    isSubmitting: submissionState
-  };
+  return { handleSubmit, error };
 };
