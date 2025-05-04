@@ -14,6 +14,7 @@ export const useWizardSubmission = (
   user: User | null
 ) => {
   const navigate = useNavigate();
+  const [submissionState, setSubmissionState] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     if (!user) {
@@ -27,6 +28,7 @@ export const useWizardSubmission = (
     }
 
     setIsSubmitting(true);
+    setSubmissionState(true);
 
     try {
       let photoPath = null;
@@ -102,11 +104,12 @@ export const useWizardSubmission = (
         variant: "destructive",
       });
       setIsSubmitting(false);
+      setSubmissionState(false);
     }
   };
 
   return {
     handleSubmit,
-    isSubmitting
+    isSubmitting: submissionState
   };
 };
