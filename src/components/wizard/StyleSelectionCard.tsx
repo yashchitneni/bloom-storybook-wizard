@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React from 'react';
+import { getStyleImageUrl, getFallbackStyleImageUrl } from '@/utils/image-utils';
 
 interface StyleSelectionCardProps {
   onSelectStyle: (style: string) => void;
@@ -15,64 +15,16 @@ const StyleSelectionCard: React.FC<StyleSelectionCardProps> = ({
   styles,
   isActive
 }) => {
-  const [styleUrls, setStyleUrls] = useState<Record<string, string>>({});
-  
-  // Fetch images from Supabase storage
-  useEffect(() => {
-    const fetchImages = async () => {
-      const urls: Record<string, string> = {};
-      
-      for (const style of styles) {
-        const styleLower = style.toLowerCase().replace(/\s+/g, '-');
-        const fileName = `${styleLower}.png`;
-        
-        try {
-          // Try to get the file from Supabase storage
-          const { data, error } = await supabase.storage
-            .from('images')
-            .createSignedUrl(`style-images/${fileName}`, 60 * 60); // 1 hour expiry
-          
-          if (data?.signedUrl) {
-            urls[style] = data.signedUrl;
-          } else {
-            // Fall back to local images
-            switch(styleLower) {
-              case "retro":
-                urls[style] = "/public/lovable-uploads/aa1b7bb2-64d7-42b3-883f-b70da108de28.png";
-                break;
-              case "3d":
-                urls[style] = "/public/lovable-uploads/731acf50-a01b-4f37-b02d-f7389f0d09ce.png";
-                break;
-              case "picture-book":
-                urls[style] = "/public/lovable-uploads/29a1f49c-fff3-4806-9b29-121e5a2a0af2.png";
-                break;
-              case "watercolor":
-                urls[style] = "/public/lovable-uploads/ca26fbd9-76e4-4327-b14c-6fc6659a80d4.png";
-                break;
-              default:
-                // Use the uploaded images if available
-                if (style === "Retro") {
-                  urls[style] = "/public/lovable-uploads/96900da0-d66c-46f5-aa49-36f111f0146d.png";
-                } else if (style === "3D") {
-                  urls[style] = "/public/lovable-uploads/8741f97c-e0bf-47d3-9d5b-b745946a1586.png";
-                } else if (style === "Picture Book") {
-                  urls[style] = "/public/lovable-uploads/5053f55a-359f-4748-a1db-c00eac13d432.png";
-                } else if (style === "Watercolor") {
-                  urls[style] = "/public/lovable-uploads/0c986f40-8a97-4196-aac7-c7984bcfaffd.png";
-                }
-                break;
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching image for ${style}:`, error);
-        }
-      }
-      
-      setStyleUrls(urls);
-    };
-    
-    fetchImages();
-  }, [styles]);
+  const getImageUrl = (style: string): string => {
+    try {
+      // Try to get the image from Supabase storage first
+      return getStyleImageUrl(style);
+    } catch (error) {
+      console.error(`Error loading image for ${style}:`, error);
+      // Fall back to local images if storage fails
+      return getFallbackStyleImageUrl(style);
+    }
+  };
   
   return (
     <div className="space-y-4">
@@ -92,7 +44,7 @@ const StyleSelectionCard: React.FC<StyleSelectionCardProps> = ({
               `}
             >
               <img 
-                src={styleUrls[style] || '/placeholder.svg'}
+                src={getImageUrl(style)}
                 alt={`${style} style`}
                 className="w-full h-full object-cover"
               />

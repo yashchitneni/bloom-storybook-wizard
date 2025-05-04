@@ -3,7 +3,7 @@ import React from 'react';
 import Button from "../Button";
 import { PhotoStyleStepProps } from "@/types/wizard";
 import { ChevronLeft } from "lucide-react";
-import { getFileUrl } from '@/utils/storage-utils';
+import { getStyleImageUrl, getFallbackStyleImageUrl } from '@/utils/image-utils';
 
 const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({ 
   onNext, 
@@ -20,34 +20,14 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
     }
   };
   
-  // Image paths stored in Supabase storage
-  const styleImages: Record<string, string> = {
-    "retro": "style-images/retro-style.png",
-    "3d": "style-images/3d-style.png", 
-    "picture book": "style-images/picture-book-style.png",
-    "watercolor": "style-images/watercolor-style.png"
-  };
-  
-  const getStyleImageUrl = (styleName: string) => {
-    const styleLower = styleName.toLowerCase();
-    const imagePath = styleImages[styleLower] || `style-images/${styleLower}-style.png`;
-    
-    // First try to get from Supabase storage if available
-    const storageUrl = getFileUrl(imagePath);
-    if (storageUrl) return storageUrl;
-    
-    // Fall back to local images as backup
-    switch(styleLower) {
-      case "retro":
-        return "/public/lovable-uploads/aa1b7bb2-64d7-42b3-883f-b70da108de28.png";
-      case "3d":
-        return "/public/lovable-uploads/731acf50-a01b-4f37-b02d-f7389f0d09ce.png";
-      case "picture book":
-        return "/public/lovable-uploads/29a1f49c-fff3-4806-9b29-121e5a2a0af2.png";
-      case "watercolor":
-        return "/public/lovable-uploads/ca26fbd9-76e4-4327-b14c-6fc6659a80d4.png";
-      default:
-        return "/public/placeholder.svg";
+  const getImageUrl = (style: string): string => {
+    try {
+      // Try to get the image from Supabase storage first
+      return getStyleImageUrl(style);
+    } catch (error) {
+      console.error(`Error loading image for ${style}:`, error);
+      // Fall back to local images if storage fails
+      return getFallbackStyleImageUrl(style);
     }
   };
   

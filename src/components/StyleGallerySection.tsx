@@ -1,27 +1,24 @@
 
 import { useState } from "react";
+import { getStyleImageUrl, getFallbackStyleImageUrl } from "@/utils/image-utils";
 
 const StyleGallerySection = () => {
   const styles = [
     {
       name: "Retro",
       description: "Pixel art style with nostalgic retro vibes",
-      image: "public/lovable-uploads/aa1b7bb2-64d7-42b3-883f-b70da108de28.png"
     },
     {
       name: "3D",
       description: "Modern 3D rendered illustrations",
-      image: "public/lovable-uploads/731acf50-a01b-4f37-b02d-f7389f0d09ce.png"
     },
     {
       name: "Picture Book",
       description: "Charming hand-drawn picture book illustrations",
-      image: "public/lovable-uploads/29a1f49c-fff3-4806-9b29-121e5a2a0af2.png"
     },
     {
       name: "Watercolor",
       description: "Soft and dreamy watercolor paintings",
-      image: "public/lovable-uploads/ca26fbd9-76e4-4327-b14c-6fc6659a80d4.png"
     }
   ];
 
@@ -29,6 +26,17 @@ const StyleGallerySection = () => {
 
   const scrollToWizard = () => {
     document.getElementById('wizard')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const getImageUrl = (styleName: string): string => {
+    try {
+      // Try to get the image from Supabase storage first
+      return getStyleImageUrl(styleName);
+    } catch (error) {
+      console.error(`Error loading image for ${styleName}:`, error);
+      // Fall back to local images if storage fails
+      return getFallbackStyleImageUrl(styleName);
+    }
   };
 
   return (
@@ -50,7 +58,7 @@ const StyleGallerySection = () => {
             >
               <div className="aspect-[4/5] relative">
                 <img 
-                  src={style.image} 
+                  src={getImageUrl(style.name)} 
                   alt={`${style.name} illustration style`}
                   className="w-full h-full object-cover"
                 />

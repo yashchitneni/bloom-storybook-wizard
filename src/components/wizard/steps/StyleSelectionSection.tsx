@@ -29,7 +29,7 @@ const StyleSelectionSection: React.FC<StyleSelectionSectionProps> = ({
         onSelectStyle={onSelectStyle}
         selectedStyle={selectedStyle}
         styles={styles}
-        isActive={true}
+        isActive={isActive}
       />
     </motion.section>
   );
