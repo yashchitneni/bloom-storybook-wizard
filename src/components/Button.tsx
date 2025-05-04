@@ -26,9 +26,9 @@ const Button = ({
   className,
 }: ButtonProps) => {
   const variants = {
-    primary: "bg-persimmon text-white hover:bg-opacity-90",
-    secondary: "bg-sunshine text-darkText hover:bg-opacity-90",
-    outline: "bg-transparent border border-persimmon text-persimmon hover:bg-persimmon/5",
+    primary: "bg-goldenYellow text-white hover:bg-opacity-90",
+    secondary: "bg-mintGreen text-darkText hover:bg-opacity-90",
+    outline: "bg-transparent border border-goldenYellow text-goldenYellow hover:bg-goldenYellow/5",
   };
 
   const sizes = {
@@ -43,13 +43,13 @@ const Button = ({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "font-poppins font-bold inline-flex items-center justify-center rounded-999 transition-all duration-200 shadow-card",
+        "font-poppins font-bold inline-flex items-center justify-center rounded-full transition-all duration-200 shadow-lg",
         variants[variant],
         sizes[size],
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}
-      whileHover={!disabled ? { scale: 1.03 } : {}}
+      whileHover={!disabled ? { scale: 1.05, boxShadow: "0 0 15px rgba(255, 215, 0, 0.6)" } : {}}
       whileTap={!disabled ? { scale: 0.98 } : {}}
     >
       <span>{children}</span>

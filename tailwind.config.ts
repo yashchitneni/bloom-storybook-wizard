@@ -1,4 +1,3 @@
-
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
 import tailwindcssAnimate from 'tailwindcss-animate';
@@ -25,6 +24,7 @@ const config: Config = {
         sans: ["var(--font-sans)", ...fontFamily.sans],
         fredoka: ["Fredoka One", "cursive"],
         poppins: ["Poppins", "sans-serif"],
+        lato: ["Lato", "sans-serif"],
         inter: ["Inter", "sans-serif"],
       },
       colors: {
@@ -62,7 +62,9 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         // Custom colors
-        persimmon: "#FF6B35",
+        lavender: "#E6E6FA",
+        goldenYellow: "#FFD700",
+        mintGreen: "#98FF98",
         darkText: "#1F2937",
         grayText: "#4B5563",
         lightGray: "#F3F4F6",
@@ -91,18 +93,6 @@ const config: Config = {
           800: "#9a2d10",
           900: "#7d2910",
         },
-        lavender: {
-          50: "#f6f4fd", 
-          100: "#efe8fa",
-          200: "#e0d5f5",
-          300: "#c9b6ee",
-          400: "#ac8ce3",
-          500: "#9769d9",
-          600: "#824dca",
-          700: "#6e3eb1", 
-          800: "#5c3591",
-          900: "#4d2e77",
-        },
         rose: {
           50: "#fff5f5",
           100: "#ffe7e7",
@@ -120,6 +110,8 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "1.5rem", // 24px
+        "2xl": "2rem", // 32px
       },
       keyframes: {
         "accordion-down": {
@@ -130,10 +122,26 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(255, 215, 0, 0.4)" },
+          "50%": { boxShadow: "0 0 20px 5px rgba(255, 215, 0, 0.7)" },
+        },
+        "bounce-in": {
+          "0%": { transform: "scale(0.9)", opacity: "0" },
+          "70%": { transform: "scale(1.05)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "float": "float 6s ease-in-out infinite",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "bounce-in": "bounce-in 0.6s ease-out",
       },
     },
   },

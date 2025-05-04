@@ -4,7 +4,7 @@ import { AuthButtons } from "./AuthButtons";
 
 const Header = () => {
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-lavender shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link to="/" className="flex items-center">
           <img 

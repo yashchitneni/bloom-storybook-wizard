@@ -6,10 +6,12 @@
 @layer base {
   :root {
     --persimmon: #FF7043;
-    --sunshine: #FFE0A3;
+    --sunshine: #FFD700; /* Updated to Golden Yellow */
     --cream: #FFF8EE;
     --darkText: #222A3F;
     --lightText: #647387;
+    --lavender: #E6E6FA;
+    --mint-green: #98FF98;
     
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
@@ -34,25 +36,15 @@
   }
  
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
+    /* ... keep existing code */
+  }
+
+  body {
+    font-family: 'Lato', sans-serif; /* Default body font */
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif; /* Headings font */
   }
 }
 
@@ -87,7 +79,7 @@
   }
 
   .wizard-progress-bar {
-    @apply h-full bg-persimmon rounded-full transition-all duration-500 ease-out;
+    @apply h-full bg-goldenYellow rounded-full transition-all duration-500 ease-out;
   }
   
   .hover-lift {
@@ -96,5 +88,31 @@
   
   .hover-lift:hover {
     @apply -translate-y-1 shadow-lg;
+  }
+
+  /* New whimsical styles */
+  .whimsical-card {
+    @apply bg-white rounded-xl p-6 shadow-md transition-all duration-300;
+  }
+
+  .whimsical-card:hover {
+    @apply transform -translate-y-2 shadow-lg;
+    box-shadow: 0 10px 25px -5px rgba(255, 215, 0, 0.3);
+  }
+
+  .lavender-gradient {
+    background: linear-gradient(135deg, #E6E6FA 0%, #98FF98 100%);
+  }
+
+  /* Star particle */
+  .star-particle {
+    @apply absolute rounded-full;
+    animation: twinkle 3s infinite ease-in-out;
+    background-color: rgba(255, 215, 0, 0.6);
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1); }
   }
 }

@@ -24,7 +24,7 @@ const StyleSelectionSection: React.FC<StyleSelectionSectionProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <h3 className="text-xl font-bold">Choose Illustration Style</h3>
+      <h3 className="text-xl font-bold font-poppins">Choose Illustration Style</h3>
       <StyleSelectionCard
         onSelectStyle={onSelectStyle}
         selectedStyle={selectedStyle}
