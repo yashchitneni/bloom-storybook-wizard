@@ -92,15 +92,18 @@ export const useWizardSubmission = (
           characterPhotoUrl = characterPhotoPath;
         }
 
-        // Insert character record - using executeRaw because the 'characters' table
+        // Insert character record - using rpc call because the 'characters' table
         // isn't in the TypeScript types yet
-        const { error: characterInsertError } = await supabase.rpc('insert_character', {
-          p_storybook_id: storybookId,
-          p_name: character.name,
-          p_relation: character.relation,
-          p_gender: character.gender,
-          p_photo_url: characterPhotoUrl
-        });
+        const { error: characterInsertError } = await supabase.rpc(
+          'insert_character',
+          {
+            p_storybook_id: storybookId,
+            p_name: character.name,
+            p_relation: character.relation,
+            p_gender: character.gender,
+            p_photo_url: characterPhotoUrl
+          } as any // Use type assertion to bypass TypeScript error
+        );
 
         if (characterInsertError) {
           console.error(`Character insert failed: ${characterInsertError.message}`);
