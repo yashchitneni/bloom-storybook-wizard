@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +23,7 @@ export const useWizardState = () => {
   const [themes, setThemes] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<{[theme: string]: string[]}>({});
   const [messages, setMessages] = useState<string[]>([]);
-  const [styles, setStyles] = useState<string[]>([]);
+  const [styles, setStyles] = useState<string[]>(["Retro", "3D", "Picture Book", "Watercolor"]);
   const [ageCategories, setAgeCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
@@ -99,23 +98,7 @@ export const useWizardState = () => {
           setMessages(messagesData.map(m => m.name));
         }
         
-        // Fetch styles
-        const { data: stylesData, error: stylesError } = await supabase
-          .from('styles')
-          .select('name');
-          
-        if (stylesError) {
-          console.error("Error fetching styles:", stylesError);
-          toast({
-            title: "Error loading styles",
-            description: "Could not load style options. Please try again.",
-            variant: "destructive",
-          });
-        }
-        
-        if (stylesData) {
-          setStyles(stylesData.map(s => s.name));
-        }
+        // Note: We're now hardcoding the styles above instead of fetching them
         
         // Fetch age categories
         const { data: ageData, error: ageError } = await supabase
@@ -140,7 +123,7 @@ export const useWizardState = () => {
           themes: themesData?.map(t => t.name) || [],
           subjects: subjectsData?.length || 0,
           messages: messagesData?.map(m => m.name) || [],
-          styles: stylesData?.map(s => s.name) || [],
+          styles: styles,
           ageCategories: ageData?.map(a => a.name) || []
         });
 

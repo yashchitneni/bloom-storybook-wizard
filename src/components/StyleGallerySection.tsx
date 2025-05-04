@@ -4,20 +4,24 @@ import { useState } from "react";
 const StyleGallerySection = () => {
   const styles = [
     {
-      name: "Cartoon",
-      description: "Playful and colorful cartoon style illustrations"
-    },
-    {
-      name: "Watercolor",
-      description: "Soft and dreamy watercolor paintings"
+      name: "Retro",
+      description: "Pixel art style with nostalgic retro vibes",
+      image: "public/lovable-uploads/aa1b7bb2-64d7-42b3-883f-b70da108de28.png"
     },
     {
       name: "3D",
-      description: "Modern 3D rendered illustrations"
+      description: "Modern 3D rendered illustrations",
+      image: "public/lovable-uploads/731acf50-a01b-4f37-b02d-f7389f0d09ce.png"
     },
     {
-      name: "Pop-Art",
-      description: "Bold and vibrant pop-art illustrations"
+      name: "Picture Book",
+      description: "Charming hand-drawn picture book illustrations",
+      image: "public/lovable-uploads/29a1f49c-fff3-4806-9b29-121e5a2a0af2.png"
+    },
+    {
+      name: "Watercolor",
+      description: "Soft and dreamy watercolor paintings",
+      image: "public/lovable-uploads/ca26fbd9-76e4-4327-b14c-6fc6659a80d4.png"
     }
   ];
 
@@ -44,10 +48,12 @@ const StyleGallerySection = () => {
               onMouseLeave={() => setHoveredStyle(null)}
               onClick={scrollToWizard}
             >
-              <div className="aspect-[4/5] bg-gray-200 relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-3xl">{style.name === "Cartoon" ? "🎨" : style.name === "Watercolor" ? "🖌️" : style.name === "3D" ? "🧩" : "🎭"}</span>
-                </div>
+              <div className="aspect-[4/5] relative">
+                <img 
+                  src={style.image} 
+                  alt={`${style.name} illustration style`}
+                  className="w-full h-full object-cover"
+                />
                 
                 {/* Hover Overlay */}
                 <div className={`

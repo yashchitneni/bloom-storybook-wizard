@@ -19,6 +19,21 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
     }
   };
   
+  const getStyleImage = (styleName: string) => {
+    switch(styleName.toLowerCase()) {
+      case "retro":
+        return "public/lovable-uploads/aa1b7bb2-64d7-42b3-883f-b70da108de28.png";
+      case "3d":
+        return "public/lovable-uploads/731acf50-a01b-4f37-b02d-f7389f0d09ce.png";
+      case "picture book":
+        return "public/lovable-uploads/29a1f49c-fff3-4806-9b29-121e5a2a0af2.png";
+      case "watercolor":
+        return "public/lovable-uploads/ca26fbd9-76e4-4327-b14c-6fc6659a80d4.png";
+      default:
+        return "";
+    }
+  };
+  
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-bold">Upload Photo & Choose Style</h3>
@@ -72,9 +87,11 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
                 ${selectedStyle === style ? "ring-2 ring-persimmon ring-offset-2" : ""}
               `}
             >
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                <span className="font-medium text-lg">{style}</span>
-              </div>
+              <img 
+                src={getStyleImage(style)}
+                alt={`${style} style`}
+                className="w-full h-full object-cover"
+              />
               <div className={`
                 absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 
                 flex items-center justify-center transition-all duration-200
@@ -84,7 +101,7 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
                   text-white opacity-0 group-hover:opacity-100 font-bold
                   ${selectedStyle === style ? 'opacity-100' : ''}
                 `}>
-                  Select
+                  {selectedStyle === style ? 'Selected' : 'Select'}
                 </span>
               </div>
             </div>
