@@ -91,28 +91,16 @@ export const useWizardSubmission = (
           characterPhotoUrl = characterPhotoPath;
         }
 
-        // Insert character record using rpc call
-        // Define the parameters type to match the expected structure
-        interface InsertCharacterParams {
-          p_storybook_id: string;
-          p_name: string;
-          p_relation: string;
-          p_gender: string;
-          p_photo_url: string | null;
-        }
-
-        const params: InsertCharacterParams = {
-          p_storybook_id: storybookId,
-          p_name: character.name,
-          p_relation: character.relation,
-          p_gender: character.gender,
-          p_photo_url: characterPhotoUrl
-        };
-
-        // Fix the typing issue by using a proper type assertion
+        // Fixed: Explicitly type the parameters as a record to match what the RPC function expects
         const { error: characterInsertError } = await supabase.rpc(
           'insert_character',
-          params
+          {
+            p_storybook_id: storybookId,
+            p_name: character.name,
+            p_relation: character.relation,
+            p_gender: character.gender,
+            p_photo_url: characterPhotoUrl
+          } as Record<string, any>
         );
 
         if (characterInsertError) {
