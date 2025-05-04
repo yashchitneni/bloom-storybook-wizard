@@ -77,6 +77,24 @@ export interface ChildInfoStepProps {
 export interface CheckoutStepProps {
   onSubmit: () => void;
   onPrevious: () => void;
+  onEmailChange: (email: string) => void;
   wizardData: WizardData;
   isSubmitting: boolean;
+}
+
+export interface PreviewStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  wizardData: WizardData;
+}
+
+export interface StorySparkStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  onSelectTheme: (theme: string) => void;
+  onSelectMoral: (moral: string) => void;
+  onSpecialDetailsChange: (details: string) => void;
+  selectedTheme: string;
+  selectedMoral: string;
+  specialDetails: string;
 }

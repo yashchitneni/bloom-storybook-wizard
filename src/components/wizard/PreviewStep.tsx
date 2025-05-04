@@ -16,7 +16,7 @@ const PreviewStep: React.FC<PreviewStepProps> = ({
       
       <div className="flex flex-col items-center">
         <motion.div 
-          className="relative w-64 h-80 bg-mint/20 rounded-lg shadow-lg overflow-hidden"
+          className="relative w-64 h-80 bg-mint-500/20 rounded-lg shadow-lg overflow-hidden"
           initial={{ rotateY: -90, opacity: 0 }}
           animate={{ rotateY: 0, opacity: 1 }}
           transition={{ duration: 0.7, ease: "easeOut" }}

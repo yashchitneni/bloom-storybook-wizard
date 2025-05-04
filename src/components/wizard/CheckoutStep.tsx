@@ -15,7 +15,7 @@ const CheckoutStep: React.FC<CheckoutStepProps> = ({
     <div className="space-y-6">
       <h3 className="text-xl font-bold">Almost there!</h3>
       
-      <div className="bg-mint/20 p-4 rounded-lg">
+      <div className="bg-mint-500/20 p-4 rounded-lg">
         <p className="text-sm">
           We'll create a personalized {wizardData.style.toLowerCase()} adventure 
           for a {wizardData.age} child with a {wizardData.theme.toLowerCase()} theme 
