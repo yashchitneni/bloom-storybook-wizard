@@ -13,12 +13,15 @@ const AgeSelectionContent: React.FC<AgeSelectionContentProps> = ({
   onSelectAge,
   ageCategories 
 }) => {
+  // Ensure we have age categories even if empty array is passed
+  const displayCategories = ageCategories.length > 0 ? ageCategories : ['0-2', '3-5', '6-9'];
+  
   return (
     <div className="flex flex-col h-full">
       <h1 className="text-2xl font-bold mb-6">Pick an Age Range</h1>
       
       <div className="grid grid-cols-3 gap-4 flex-grow">
-        {ageCategories.map((age) => (
+        {displayCategories.map((age) => (
           <motion.button
             key={age}
             onClick={() => onSelectAge(age)}

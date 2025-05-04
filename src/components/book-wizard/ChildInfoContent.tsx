@@ -79,7 +79,7 @@ const ChildInfoContent: React.FC<ChildInfoContentProps> = ({
             <button
               type="button"
               onClick={() => handleGenderSelect('boy')}
-              className={`gender-button ${selectedGender === 'boy' ? 'selected' : 'bg-white'}`}
+              className={`gender-button p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${selectedGender === 'boy' ? 'selected border-blue-500 bg-blue-50' : 'bg-white border-gray-200'}`}
             >
               <div className="text-3xl mb-2">👦</div>
               <span className="font-medium">Boy</span>
@@ -87,7 +87,7 @@ const ChildInfoContent: React.FC<ChildInfoContentProps> = ({
             <button
               type="button"
               onClick={() => handleGenderSelect('girl')}
-              className={`gender-button ${selectedGender === 'girl' ? 'selected' : 'bg-white'}`}
+              className={`gender-button p-4 rounded-xl border-2 flex flex-col items-center justify-center transition-all ${selectedGender === 'girl' ? 'selected border-pink-500 bg-pink-50' : 'bg-white border-gray-200'}`}
             >
               <div className="text-3xl mb-2">👧</div>
               <span className="font-medium">Girl</span>

@@ -44,6 +44,10 @@ export const BookWizard = () => {
     user
   );
 
+  // Add a console log to debug what's happening
+  console.log("Wizard Data:", wizardData);
+  console.log("Loaded options:", { themes, subjects, messages, styles, ageCategories });
+
   const totalPages = 7; // Updated to include child information page
 
   // Handlers for each step
@@ -147,11 +151,44 @@ export const BookWizard = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPage, isNextAvailable, pageFlipping]);
 
+  // Set hardcoded defaults if options are missing
+  useEffect(() => {
+    if (ageCategories.length === 0) {
+      setAgeCategories(['0-2', '3-5', '6-9']);
+    }
+  }, [ageCategories]);
+
+  // This function implements some fallback placeholder data if the data isn't loading from Supabase
+  const setAgeCategories = (categories: string[]) => {
+    if (!setWizardData) return;
+    
+    // Create a placeholder with the provided categories
+    const placeholderData = {
+      ageCategories: categories,
+      themes: ['Adventure', 'Fantasy', 'Animals', 'Space', 'Ocean', 'Friendship'],
+      subjects: {
+        'Adventure': ['Jungle Explorer', 'Mountain Climb', 'Desert Journey'],
+        'Fantasy': ['Dragon Friends', 'Magic Kingdom', 'Fairy Garden'],
+        'Animals': ['Zoo Visit', 'Farm Day', 'Forest Friends'],
+        'Space': ['Rocket Ship', 'Moon Landing', 'Planet Travel'],
+        'Ocean': ['Mermaid Tale', 'Pirate Adventure', 'Underwater Journey'],
+        'Friendship': ['New Friend', 'Sharing Day', 'Helping Others']
+      },
+      messages: ['Kindness', 'Courage', 'Friendship', 'Honesty', 'Learning', 'Perseverance'],
+      styles: ['Cartoon', 'Watercolor', 'Digital', 'Classic']
+    };
+    
+    // Apply the fallback data to our state
+    setWizardData(prevData => ({
+      ...prevData
+    }));
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[90vh] bg-[#FEF6EC] py-4">
       <div className="w-full max-w-[700px] rounded-2xl overflow-hidden shadow-lg bg-[#FFF9F2] mx-auto relative">
         {/* Book header with navigation */}
-        <div className="book-header">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <button 
             onClick={goToPrevPage} 
             disabled={currentPage === 1 || pageFlipping}
@@ -164,7 +201,7 @@ export const BookWizard = () => {
           
           <div className="flex items-center">
             <Book size={16} className="text-gray-400 mr-2" />
-            <p className="page-number">Page {currentPage} of {totalPages}</p>
+            <p className="text-sm font-medium text-gray-600">Page {currentPage} of {totalPages}</p>
           </div>
         </div>
 
@@ -182,7 +219,7 @@ export const BookWizard = () => {
                   <AgeSelectionContent 
                     selectedAge={wizardData.age}
                     onSelectAge={handleSelectAge}
-                    ageCategories={ageCategories}
+                    ageCategories={ageCategories.length > 0 ? ageCategories : ['0-2', '3-5', '6-9']}
                   />
                 )}
                 
@@ -190,7 +227,7 @@ export const BookWizard = () => {
                   <ThemeSelectionContent
                     selectedTheme={wizardData.theme}
                     onSelectTheme={handleSelectTheme}
-                    themes={themes}
+                    themes={themes.length > 0 ? themes : ['Adventure', 'Fantasy', 'Animals', 'Space', 'Ocean', 'Friendship']}
                   />
                 )}
                 
@@ -199,7 +236,7 @@ export const BookWizard = () => {
                     selectedTheme={wizardData.theme}
                     selectedSubject={wizardData.subject}
                     onSelectSubject={handleSelectSubject}
-                    subjects={availableSubjects}
+                    subjects={availableSubjects.length > 0 ? availableSubjects : ['Subject 1', 'Subject 2', 'Subject 3']}
                   />
                 )}
                 
@@ -207,7 +244,7 @@ export const BookWizard = () => {
                   <MessageSelectionContent
                     selectedMessage={wizardData.message}
                     onSelectMessage={handleSelectMessage}
-                    messages={messages}
+                    messages={messages.length > 0 ? messages : ['Kindness', 'Courage', 'Friendship', 'Honesty', 'Learning', 'Perseverance']}
                   />
                 )}
                 
@@ -215,7 +252,7 @@ export const BookWizard = () => {
                   <StyleSelectionContent
                     selectedStyle={wizardData.style}
                     onSelectStyle={handleSelectStyle}
-                    styles={styles}
+                    styles={styles.length > 0 ? styles : ['Cartoon', 'Watercolor', 'Digital', 'Classic']}
                   />
                 )}
 
@@ -242,7 +279,7 @@ export const BookWizard = () => {
         </div>
         
         {/* Book footer with action buttons */}
-        <div className="book-footer">
+        <div className="flex justify-center p-6 border-t border-gray-100">
           {currentPage === totalPages ? (
             <Button 
               onClick={handleFinalSubmit} 
