@@ -14,21 +14,27 @@ const Wizard = () => {
   const {
     currentStep,
     wizardData,
-    totalSteps,
     setWizardData,
+    isSubmitting: wizardStateIsSubmitting,
+    setIsSubmitting,
+    totalSteps,
     handleNext,
     handlePrevious,
     handlePhotoUpload,
+    ageCategories,
+    styles,
     user
   } = useWizardState();
   
   const {
-    isSubmitting,
-    handleSubmit
-  } = useWizardSubmission(wizardData, setWizardData, (step: number) => {
-    // Set current step to the desired value
-    useState(step)[1](step);
-  }, user);
+    handleSubmit,
+    isSubmitting: submissionIsSubmitting
+  } = useWizardSubmission(
+    wizardData,
+    setWizardData,
+    setIsSubmitting,
+    user
+  );
 
   const handleStepClick = (step: number) => {
     // Only allow clicking on completed steps or the next step
@@ -111,6 +117,7 @@ const Wizard = () => {
                   onNext={navigateNext} 
                   onSelectAge={(age) => setWizardData({...wizardData, age})}
                   selectedAge={wizardData.age}
+                  ageCategories={ageCategories}
                 />
               )}
               {currentStep === 2 && (
@@ -121,8 +128,8 @@ const Wizard = () => {
                   onSelectMoral={(moral) => setWizardData({...wizardData, moral})}
                   onSpecialDetailsChange={(details) => setWizardData({...wizardData, specialDetails: details})}
                   selectedTheme={wizardData.theme}
-                  selectedMoral={wizardData.moral}
-                  specialDetails={wizardData.specialDetails}
+                  selectedMoral={wizardData.moral || ""}
+                  specialDetails={wizardData.specialDetails || ""}
                 />
               )}
               {currentStep === 3 && (
@@ -133,20 +140,16 @@ const Wizard = () => {
                   selectedStyle={wizardData.style}
                   onPhotoUpload={handlePhotoUpload}
                   photoPreview={wizardData.photoPreview}
+                  styles={styles}
                 />
               )}
               {currentStep === 4 && (
                 <CheckoutStep
                   onPrevious={navigatePrevious}
-                  selectedAge={wizardData.age}
-                  selectedTheme={wizardData.theme}
-                  selectedMoral={wizardData.moral}
-                  selectedStyle={wizardData.style}
-                  specialDetails={wizardData.specialDetails}
+                  wizardData={wizardData}
                   onEmailChange={(email) => setWizardData({...wizardData, email})}
-                  email={wizardData.email}
                   onSubmit={handleSubmit}
-                  isSubmitting={isSubmitting}
+                  isSubmitting={submissionIsSubmitting || wizardStateIsSubmitting}
                 />
               )}
             </motion.div>

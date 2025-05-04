@@ -1,19 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-
-export interface WizardData {
-  age: string;
-  theme: string;
-  subject: string;
-  message: string;
-  customNote: string;
-  photoFile: File | null;
-  photoPreview: string | null;
-  style: string;
-  email: string;
-}
+import { WizardData } from "@/types/wizard";
 
 export const useWizardState = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -26,7 +14,9 @@ export const useWizardState = () => {
     photoFile: null,
     photoPreview: null,
     style: "",
-    email: ""
+    email: "",
+    moral: "",
+    specialDetails: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [themes, setThemes] = useState<string[]>([]);

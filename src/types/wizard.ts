@@ -9,6 +9,8 @@ export interface WizardData {
   photoPreview: string | null;
   style: string;
   email: string;
+  moral?: string;
+  specialDetails?: string;
 }
 
 export interface AgeSelectionStepProps {
@@ -24,6 +26,17 @@ export interface ThemeSelectionStepProps {
   onSelectTheme: (theme: string) => void;
   selectedTheme: string;
   themes: string[];
+}
+
+export interface StorySparkStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  onSelectTheme: (theme: string) => void;
+  onSelectMoral: (moral: string) => void;
+  onSpecialDetailsChange: (details: string) => void;
+  selectedTheme: string;
+  selectedMoral: string;
+  specialDetails: string;
 }
 
 export interface SubjectSelectionStepProps {

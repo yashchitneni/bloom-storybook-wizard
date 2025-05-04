@@ -74,6 +74,8 @@ export const useWizardSubmission = (
           subject: wizardData.subject,
           message: wizardData.message,
           custom_note: wizardData.customNote,
+          moral: wizardData.moral,
+          special_details: wizardData.specialDetails,
           style: wizardData.style,
           photo_url: photoPath,
         })
@@ -104,6 +106,7 @@ export const useWizardSubmission = (
   };
 
   return {
-    handleSubmit
+    handleSubmit,
+    isSubmitting
   };
 };
