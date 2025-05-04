@@ -8,6 +8,10 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import WizardPage from "./pages/WizardPage";
+import AccountPage from "./pages/AccountPage";
+import StoryDetailPage from "./pages/StoryDetailPage";
+import ExamplePage from "./pages/ExamplePage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +25,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/wizard" element={<WizardPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/story/:id" element={<StoryDetailPage />} />
+            <Route path="/example" element={<ExamplePage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

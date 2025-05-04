@@ -2,8 +2,9 @@
 export interface WizardData {
   age: string;
   theme: string;
-  moral: string;
-  specialDetails: string;
+  subject: string;
+  message: string;
+  customNote: string;
   photoFile: File | null;
   photoPreview: string | null;
   style: string;
@@ -14,17 +15,39 @@ export interface AgeSelectionStepProps {
   onNext: () => void;
   onSelectAge: (age: string) => void;
   selectedAge: string;
+  ageCategories: string[];
 }
 
-export interface StorySparkStepProps {
+export interface ThemeSelectionStepProps {
   onNext: () => void;
   onPrevious: () => void;
   onSelectTheme: (theme: string) => void;
-  onSelectMoral: (moral: string) => void;
-  onSpecialDetailsChange: (details: string) => void;
   selectedTheme: string;
-  selectedMoral: string;
-  specialDetails: string;
+  themes: string[];
+}
+
+export interface SubjectSelectionStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  onSelectSubject: (subject: string) => void;
+  selectedTheme: string;
+  selectedSubject: string;
+  subjects: string[];
+}
+
+export interface MessageSelectionStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  onSelectMessage: (message: string) => void;
+  selectedMessage: string;
+  messages: string[];
+}
+
+export interface CustomNoteStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  onCustomNoteChange: (note: string) => void;
+  customNote: string;
 }
 
 export interface PhotoStyleStepProps {
@@ -34,17 +57,19 @@ export interface PhotoStyleStepProps {
   selectedStyle: string;
   onPhotoUpload: (file: File) => void;
   photoPreview: string | null;
+  styles: string[];
+}
+
+export interface PreviewStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+  wizardData: WizardData;
 }
 
 export interface CheckoutStepProps {
   onPrevious: () => void;
-  selectedAge: string;
-  selectedTheme: string;
-  selectedMoral: string;
-  selectedStyle: string;
-  specialDetails: string;
+  wizardData: WizardData;
   onEmailChange: (email: string) => void;
-  email: string;
   onSubmit: () => void;
   isSubmitting: boolean;
 }

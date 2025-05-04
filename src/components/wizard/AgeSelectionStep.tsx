@@ -3,12 +3,12 @@ import React from 'react';
 import Button from "../Button";
 import { AgeSelectionStepProps } from "@/types/wizard";
 
-const AgeSelectionStep: React.FC<AgeSelectionStepProps> = ({ onNext, onSelectAge, selectedAge }) => {
+const AgeSelectionStep: React.FC<AgeSelectionStepProps> = ({ onNext, onSelectAge, selectedAge, ageCategories }) => {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-bold">How old is your little hero?</h3>
       <div className="flex flex-col sm:flex-row gap-4">
-        {["2-3 yrs", "4-6 yrs", "7-8 yrs"].map((age) => (
+        {ageCategories.map((age) => (
           <div 
             key={age}
             onClick={() => onSelectAge(age)}
@@ -17,7 +17,7 @@ const AgeSelectionStep: React.FC<AgeSelectionStepProps> = ({ onNext, onSelectAge
                 ? "border-persimmon bg-persimmon/5" 
                 : "border-gray-200 hover:border-persimmon/50"}`}
           >
-            <span className="font-medium font-fredoka">{age}</span>
+            <span className="font-medium font-fredoka">{age} yrs</span>
           </div>
         ))}
       </div>

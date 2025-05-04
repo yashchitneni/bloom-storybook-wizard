@@ -10,10 +10,9 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
   onSelectStyle,
   selectedStyle,
   onPhotoUpload,
-  photoPreview
+  photoPreview,
+  styles
 }) => {
-  const styles = ["Cartoon", "Watercolor", "3D", "Pop-Art"];
-  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       onPhotoUpload(e.target.files[0]);
@@ -22,7 +21,7 @@ const PhotoStyleStep: React.FC<PhotoStyleStepProps> = ({
   
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-bold">Photo & Style</h3>
+      <h3 className="text-xl font-bold">Upload Photo & Choose Style</h3>
       
       <div className="space-y-4">
         <label className="block text-sm font-medium">Upload a photo of your little hero</label>

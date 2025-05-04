@@ -6,13 +6,8 @@ import { ChevronLeft } from "lucide-react";
 
 const CheckoutStep: React.FC<CheckoutStepProps> = ({ 
   onPrevious,
-  selectedAge,
-  selectedTheme,
-  selectedMoral,
-  selectedStyle,
-  specialDetails,
+  wizardData,
   onEmailChange,
-  email,
   onSubmit,
   isSubmitting
 }) => {
@@ -22,11 +17,10 @@ const CheckoutStep: React.FC<CheckoutStepProps> = ({
       
       <div className="bg-mint/20 p-4 rounded-lg">
         <p className="text-sm">
-          We'll create a 10-page {selectedStyle} adventure 
-          {selectedAge ? ` for a ${selectedAge} child` : ''} 
-          {selectedTheme ? ` with a ${selectedTheme.toLowerCase()} theme` : ''} 
-          {selectedMoral ? ` where they learn about ${selectedMoral.toLowerCase()}` : ''}.
-          {specialDetails ? ` We'll include your special details: "${specialDetails}"` : ''}
+          We'll create a personalized {wizardData.style.toLowerCase()} adventure 
+          for a {wizardData.age} child with a {wizardData.theme.toLowerCase()} theme 
+          about {wizardData.subject.toLowerCase()} where they learn about {wizardData.message.toLowerCase()}.
+          {wizardData.customNote ? ` We'll include your special note: "${wizardData.customNote}"` : ''}
         </p>
       </div>
       
@@ -36,7 +30,7 @@ const CheckoutStep: React.FC<CheckoutStepProps> = ({
           type="email"
           className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-persimmon"
           placeholder="your@email.com"
-          value={email}
+          value={wizardData.email}
           onChange={(e) => onEmailChange(e.target.value)}
         />
       </div>
@@ -51,9 +45,9 @@ const CheckoutStep: React.FC<CheckoutStepProps> = ({
       <Button 
         className="w-full py-3 text-center"
         onClick={onSubmit}
-        disabled={isSubmitting}
+        disabled={isSubmitting || !wizardData.email}
       >
-        <span className="mr-2">🔒</span> {isSubmitting ? "Processing..." : "Checkout"}
+        <span className="mr-2">🔒</span> {isSubmitting ? "Processing..." : "Purchase & Create My Book"}
       </Button>
       
       <p className="text-xs text-center text-gray-500">

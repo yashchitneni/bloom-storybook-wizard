@@ -10,10 +10,9 @@ import { uploadFile } from "@/utils/storage-utils";
 export const useWizardSubmission = (
   wizardData: WizardData,
   setWizardData: (data: WizardData) => void,
-  setCurrentStep: (step: number) => void,
+  setIsSubmitting: (isSubmitting: boolean) => void,
   user: User | null
 ) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
@@ -32,7 +31,7 @@ export const useWizardSubmission = (
     try {
       let photoPath = null;
       
-      // Upload photo if available using our new storage utility
+      // Upload photo if available
       if (wizardData.photoFile) {
         photoPath = await uploadFile(wizardData.photoFile, {
           folder: "uploads",
@@ -44,22 +43,42 @@ export const useWizardSubmission = (
         }
       }
       
-      // Create storybook entry using type assertion to bypass TypeScript errors
-      // We need to cast the entire chain of methods to any
-      const client = supabase as any;
-      const { error: insertError } = await client
+      // Check if we have a profile for this user
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+      
+      // If no profile exists, create one
+      if (profileError && profileError.code === 'PGRST116') {
+        const { error: insertProfileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: wizardData.email || user.email
+          });
+          
+        if (insertProfileError) {
+          throw new Error(`Error creating profile: ${insertProfileError.message}`);
+        }
+      }
+      
+      // Create storybook entry
+      const { data: storybook, error: insertError } = await supabase
         .from('storybooks')
-        .insert([{
-          user_id: user.id,
-          email: wizardData.email || user.email,
-          child_name: "Child", // This should be collected from the user
-          age_range: wizardData.age,
+        .insert({
+          author_id: user.id,
+          age_category: wizardData.age,
           theme: wizardData.theme,
-          moral: wizardData.moral,
+          subject: wizardData.subject,
+          message: wizardData.message,
+          custom_note: wizardData.customNote,
           style: wizardData.style,
-          note: wizardData.specialDetails,
-          photo_path: photoPath,
-        }]);
+          photo_url: photoPath,
+        })
+        .select()
+        .single();
         
       if (insertError) {
         throw new Error(`Error saving storybook: ${insertError.message}`);
@@ -67,21 +86,12 @@ export const useWizardSubmission = (
       
       toast({
         title: "Success!",
-        description: "Your storybook has been submitted and is now being created.",
+        description: "Your storybook has been submitted and is now being generated.",
       });
       
-      // Reset form after successful submission
-      setWizardData({
-        age: "",
-        theme: "",
-        moral: "",
-        specialDetails: "",
-        photoFile: null,
-        photoPreview: null,
-        style: "",
-        email: user.email || ""
-      });
-      setCurrentStep(1);
+      // Navigate to the storybook page
+      navigate(`/story/${storybook.id}`);
+      
     } catch (error: any) {
       console.error("Error creating storybook:", error);
       toast({
@@ -89,14 +99,11 @@ export const useWizardSubmission = (
         description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
 
   return {
-    isSubmitting,
-    setIsSubmitting,
     handleSubmit
   };
 };

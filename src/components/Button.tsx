@@ -2,6 +2,7 @@
 import React, { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ButtonProps {
   children: ReactNode;
@@ -37,7 +38,7 @@ const Button = ({
   };
 
   return (
-    <button
+    <motion.button
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -48,12 +49,14 @@ const Button = ({
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}
+      whileHover={!disabled ? { scale: 1.03 } : {}}
+      whileTap={!disabled ? { scale: 0.98 } : {}}
     >
       <span>{children}</span>
       {withArrow && (
-        <ArrowRight className={cn("ml-2 h-4 w-4", withArrow && "group-hover:animate-arrow-wiggle")} />
+        <ArrowRight className={cn("ml-2 h-4 w-4")} />
       )}
-    </button>
+    </motion.button>
   );
 };
 

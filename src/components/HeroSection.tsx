@@ -2,10 +2,13 @@
 import { ArrowRight } from "lucide-react";
 import Button from "./Button";
 import TransformVisual from "./TransformVisual";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
-  const scrollToWizard = () => {
-    document.getElementById('wizard')?.scrollIntoView({ behavior: 'smooth' });
+  const navigate = useNavigate();
+
+  const handleCreateNow = () => {
+    navigate('/wizard');
   };
 
   return (
@@ -21,8 +24,8 @@ const HeroSection = () => {
               Upload one picture, pick a theme, receive a printable PDF adventure.
             </h4>
             <div>
-              <Button onClick={scrollToWizard} size="lg" withArrow>
-                Start My Book
+              <Button onClick={handleCreateNow} size="lg" withArrow>
+                Create Now
               </Button>
             </div>
             
