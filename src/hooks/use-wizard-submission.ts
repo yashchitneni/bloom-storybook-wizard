@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { WizardData } from "@/types/wizard";
 import { useNavigate } from "react-router-dom";
-import { uploadFile } from "@/utils/storage-utils";
 
 export const useWizardSubmission = (
   wizardData: WizardData,
@@ -111,8 +110,8 @@ export const useWizardSubmission = (
         };
 
         const { error: characterInsertError } = await supabase.rpc(
-          'insert_character',
-          params
+          'insert_character' as any,
+          params as any
         );
 
         if (characterInsertError) {

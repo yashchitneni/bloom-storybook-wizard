@@ -2,7 +2,7 @@
 import React from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useWizardState } from '@/hooks/use-wizard-state';
+import { useWizardState } from '@/hooks/wizard/use-wizard-state';
 import { useWizardSubmission } from '@/hooks/use-wizard-submission';
 import WizardHeader from '@/components/wizard/WizardHeader';
 import WizardPageContent from '@/components/wizard/WizardPageContent';

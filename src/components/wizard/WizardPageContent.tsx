@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
-import { useWizardState } from '@/hooks/use-wizard-state';
+import { useWizardState } from '@/hooks/wizard/use-wizard-state';
 import AgeCard from '@/components/wizard/AgeCard';
 import ThemeCard from '@/components/wizard/ThemeCard';
 import SubjectCard from '@/components/wizard/SubjectCard';
