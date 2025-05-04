@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useWizardState } from '@/hooks/use-wizard-state';
@@ -14,6 +14,9 @@ import CustomNoteCard from '@/components/wizard/CustomNoteCard';
 import PhotoStyleCard from '@/components/wizard/PhotoStyleCard';
 import PreviewCard from '@/components/wizard/PreviewCard';
 import CheckoutCard from '@/components/wizard/CheckoutCard';
+import { toast } from "@/components/ui/use-toast";
+import WizardRoadmap from "@/components/WizardRoadmap";
+import Card from "@/components/Card";
 
 const WizardPage = () => {
   const {
@@ -28,7 +31,10 @@ const WizardPage = () => {
     messages,
     styles,
     ageCategories,
-    user
+    user,
+    handleGoToStep,
+    totalSteps,
+    isLoading
   } = useWizardState();
   
   const { handleSubmit } = useWizardSubmission(
@@ -86,6 +92,22 @@ const WizardPage = () => {
     }
   }, [currentStep]);
 
+  // Show loading message if data is still loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-cream">
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center p-8">
+            <h2 className="text-2xl font-bold mb-4">Loading wizard data...</h2>
+            <div className="animate-spin h-8 w-8 border-4 border-persimmon border-t-transparent rounded-full mx-auto"></div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-cream">
       <Header />
@@ -99,7 +121,13 @@ const WizardPage = () => {
             </p>
           </div>
           
-          <div className="bg-cream rounded-xl p-6 md:p-10 shadow-sm">
+          <div id="wizard-container" className="bg-cream rounded-xl p-6 md:p-10 shadow-sm">
+            <WizardRoadmap 
+              currentStep={currentStep} 
+              totalSteps={totalSteps}
+              onStepClick={handleGoToStep}
+            />
+            
             <h2 className="text-2xl font-bold text-persimmon mb-8">Put Together Your Unique Children's Book</h2>
             
             <div className="space-y-12">

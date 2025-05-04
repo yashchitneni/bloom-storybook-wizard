@@ -1,7 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { WizardData } from "@/types/wizard";
+import { toast } from "@/components/ui/use-toast";
 
 export const useWizardState = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -24,6 +26,7 @@ export const useWizardState = () => {
   const [messages, setMessages] = useState<string[]>([]);
   const [styles, setStyles] = useState<string[]>([]);
   const [ageCategories, setAgeCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   
   const totalSteps = 8;
@@ -31,21 +34,40 @@ export const useWizardState = () => {
   // Load lookup data from Supabase
   useEffect(() => {
     const fetchLookupData = async () => {
+      setIsLoading(true);
       try {
         // Fetch themes
-        const { data: themesData } = await supabase
+        const { data: themesData, error: themesError } = await supabase
           .from('themes')
           .select('name');
+        
+        if (themesError) {
+          console.error("Error fetching themes:", themesError);
+          toast({
+            title: "Error loading themes",
+            description: "Could not load theme options. Please try again.",
+            variant: "destructive",
+          });
+        }
         
         if (themesData) {
           setThemes(themesData.map(t => t.name));
         }
         
         // Fetch subjects
-        const { data: subjectsData } = await supabase
+        const { data: subjectsData, error: subjectsError } = await supabase
           .from('subjects')
           .select('theme, name');
           
+        if (subjectsError) {
+          console.error("Error fetching subjects:", subjectsError);
+          toast({
+            title: "Error loading subjects",
+            description: "Could not load subject options. Please try again.",
+            variant: "destructive",
+          });
+        }
+        
         if (subjectsData) {
           const subjectsByTheme: {[theme: string]: string[]} = {};
           subjectsData.forEach(subject => {
@@ -58,33 +80,77 @@ export const useWizardState = () => {
         }
         
         // Fetch messages
-        const { data: messagesData } = await supabase
+        const { data: messagesData, error: messagesError } = await supabase
           .from('messages')
           .select('name');
           
+        if (messagesError) {
+          console.error("Error fetching messages:", messagesError);
+          toast({
+            title: "Error loading messages",
+            description: "Could not load message options. Please try again.",
+            variant: "destructive",
+          });
+        }
+        
         if (messagesData) {
           setMessages(messagesData.map(m => m.name));
         }
         
         // Fetch styles
-        const { data: stylesData } = await supabase
+        const { data: stylesData, error: stylesError } = await supabase
           .from('styles')
           .select('name');
           
+        if (stylesError) {
+          console.error("Error fetching styles:", stylesError);
+          toast({
+            title: "Error loading styles",
+            description: "Could not load style options. Please try again.",
+            variant: "destructive",
+          });
+        }
+        
         if (stylesData) {
           setStyles(stylesData.map(s => s.name));
         }
         
         // Fetch age categories
-        const { data: ageData } = await supabase
+        const { data: ageData, error: ageError } = await supabase
           .from('age_categories')
           .select('name');
           
+        if (ageError) {
+          console.error("Error fetching age categories:", ageError);
+          toast({
+            title: "Error loading age categories",
+            description: "Could not load age category options. Please try again.",
+            variant: "destructive",
+          });
+        }
+        
         if (ageData) {
           setAgeCategories(ageData.map(a => a.name));
         }
+
+        // Log data for debugging
+        console.log("Fetched data:", {
+          themes: themesData?.map(t => t.name) || [],
+          subjects: subjectsData?.length || 0,
+          messages: messagesData?.map(m => m.name) || [],
+          styles: stylesData?.map(s => s.name) || [],
+          ageCategories: ageData?.map(a => a.name) || []
+        });
+
       } catch (error) {
         console.error("Error fetching lookup data:", error);
+        toast({
+          title: "Error loading wizard data",
+          description: "There was a problem loading the wizard data. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -162,6 +228,7 @@ export const useWizardState = () => {
     messages,
     styles,
     ageCategories,
-    user
+    user,
+    isLoading
   };
 };
