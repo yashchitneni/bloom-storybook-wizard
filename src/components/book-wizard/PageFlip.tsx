@@ -21,8 +21,10 @@ const PageFlip: React.FC<PageFlipProps> = ({
     if (!isFlipping && pageRef.current) {
       // Reset any inline styles when not flipping
       pageRef.current.style.transform = '';
+      // Ensure animation complete is called when flipping is done
+      onAnimationComplete();
     }
-  }, [isFlipping]);
+  }, [isFlipping, onAnimationComplete]);
 
   // Animation variants for the page flip effect
   const pageVariants = {
@@ -83,7 +85,12 @@ const PageFlip: React.FC<PageFlipProps> = ({
         initial="initial"
         animate={isFlipping ? "animate" : "initial"}
         exit="exit"
-        onAnimationComplete={onAnimationComplete}
+        onAnimationComplete={() => {
+          console.log("Animation complete event fired");
+          if (isFlipping) {
+            onAnimationComplete();
+          }
+        }}
       >
         <div className="absolute inset-0 bg-[#FFF9F2] border border-[#FEF6EC] rounded-xl overflow-hidden shadow-md">
           {children}

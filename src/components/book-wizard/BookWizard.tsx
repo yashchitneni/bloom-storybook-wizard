@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useWizardState } from '@/hooks/use-wizard-state';
 import { useWizardSubmission } from '@/hooks/use-wizard-submission';
 import { useWizardNavigation } from '@/hooks/use-wizard-navigation';
@@ -37,12 +37,16 @@ export const BookWizard = () => {
     pageFlipping,
     direction,
     goToNextPage,
-    goToPrevPage
+    goToPrevPage,
+    handleAnimationComplete
   } = useWizardNavigation(totalPages);
 
   // Add a console log to debug what's happening
-  console.log("Wizard Data:", wizardData);
-  console.log("Loaded options:", { themes, subjects, messages, styles, ageCategories });
+  useEffect(() => {
+    console.log("BookWizard rendered", { currentPage, pageFlipping, direction });
+    console.log("Wizard Data:", wizardData);
+    console.log("Loaded options:", { themes, subjects, messages, styles, ageCategories });
+  }, [currentPage, pageFlipping, direction, wizardData, themes, subjects, messages, styles, ageCategories]);
 
   // Handlers for each step
   const handleSelectAge = (age: string) => {
@@ -79,12 +83,9 @@ export const BookWizard = () => {
   };
 
   // Get available subjects for selected theme
-  const availableSubjects = wizardData.theme ? subjects[wizardData.theme] || [] : [];
-
-  // Handle animation completion
-  const handleAnimationComplete = () => {
-    // Additional actions after animation completes if needed
-  };
+  const availableSubjects = wizardData.theme && subjects[wizardData.theme] ? 
+    subjects[wizardData.theme] : 
+    [];
 
   // Check if next is available based on current selections
   const isNextAvailable = () => {
@@ -94,7 +95,7 @@ export const BookWizard = () => {
       case 3: return !!wizardData.subject;
       case 4: return !!wizardData.message;
       case 5: return !!wizardData.style;
-      case 6: return !!wizardData.childName && !!wizardData.gender; // New check for child info
+      case 6: return !!wizardData.childName && !!wizardData.gender;
       case 7: return true; // Custom note is optional
       default: return false;
     }

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AnimatePresence } from "framer-motion";
 import { WizardData } from "@/types/wizard";
 import PageFlip from './PageFlip';
@@ -53,6 +53,18 @@ const WizardContent: React.FC<WizardContentProps> = ({
   styles,
   handleAnimationComplete
 }) => {
+  // Debug logging
+  useEffect(() => {
+    console.log("WizardContent rendered", {
+      currentPage,
+      ageCategories,
+      themes,
+      availableSubjects,
+      messages,
+      styles
+    });
+  }, [currentPage, ageCategories, themes, availableSubjects, messages, styles]);
+
   return (
     <div className="relative overflow-hidden" style={{ minHeight: '500px' }}>
       <AnimatePresence mode="wait" initial={false}>
