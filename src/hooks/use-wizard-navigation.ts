@@ -1,54 +1,42 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export const useWizardNavigation = (totalPages: number) => {
+  const [currentPage, setCurrentPage] = useState(1);
   const [pageFlipping, setPageFlipping] = useState(false);
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [animationComplete, setAnimationComplete] = useState(true);
   
-  // Navigation functions
+  // Simplified navigation functions
   const goToNextPage = () => {
-    if (currentPage < totalPages && !pageFlipping && animationComplete) {
-      setPageFlipping(true);
-      setAnimationComplete(false);
+    if (currentPage < totalPages && !pageFlipping) {
       setDirection('next');
+      setPageFlipping(true);
+      
+      // Update page after a brief delay to allow animation
       setTimeout(() => {
         setCurrentPage(prev => prev + 1);
         setPageFlipping(false);
-      }, 500); // Match the animation duration
+      }, 300);
     }
   };
   
   const goToPrevPage = () => {
-    if (currentPage > 1 && !pageFlipping && animationComplete) {
-      setPageFlipping(true);
-      setAnimationComplete(false);
+    if (currentPage > 1 && !pageFlipping) {
       setDirection('prev');
+      setPageFlipping(true);
+      
+      // Update page after a brief delay to allow animation
       setTimeout(() => {
         setCurrentPage(prev => prev - 1);
         setPageFlipping(false);
-      }, 500); // Match the animation duration
+      }, 300);
     }
   };
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' && !pageFlipping && currentPage < totalPages && animationComplete) {
-        goToNextPage();
-      } else if (e.key === 'ArrowLeft' && currentPage > 1 && !pageFlipping && animationComplete) {
-        goToPrevPage();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, totalPages, pageFlipping, animationComplete]);
-  
+  // Simplified handler - no need for complex animation tracking
   const handleAnimationComplete = () => {
-    console.log('Animation complete for page', currentPage);
-    setAnimationComplete(true);
+    console.log('Animation complete called for page', currentPage);
+    // Animation is now handled by the timeout above
   };
 
   return {

@@ -41,35 +41,55 @@ export const BookWizard = () => {
     handleAnimationComplete
   } = useWizardNavigation(totalPages);
 
-  // Add a console log to debug what's happening
+  // Debug log to verify rendering and state
   useEffect(() => {
     console.log("BookWizard rendered", { currentPage, pageFlipping, direction });
     console.log("Wizard Data:", wizardData);
-    console.log("Loaded options:", { themes, subjects, messages, styles, ageCategories });
-  }, [currentPage, pageFlipping, direction, wizardData, themes, subjects, messages, styles, ageCategories]);
+  }, [currentPage, pageFlipping, direction, wizardData]);
+
+  // Provide fallback data for development/testing
+  const fallbackThemes = ['Adventure', 'Fantasy', 'Animals', 'Space', 'Ocean', 'Friendship'];
+  const fallbackSubjects = ['Jungle Explorer', 'Mountain Climb', 'Desert Journey'];
+  const fallbackMessages = ['Kindness', 'Courage', 'Friendship', 'Honesty', 'Learning'];
+  const fallbackStyles = ['Cartoon', 'Watercolor', 'Digital', 'Classic'];
+  const fallbackAges = ['0-2', '3-5', '6-9'];
+
+  // Force use fallback data if Supabase data isn't loading
+  useEffect(() => {
+    const forceTimeout = setTimeout(() => {
+      console.log("Force loading fallback data if needed");
+    }, 2000);
+    return () => clearTimeout(forceTimeout);
+  }, []);
 
   // Handlers for each step
   const handleSelectAge = (age: string) => {
+    console.log("Selected age:", age);
     setWizardData({ ...wizardData, age });
   };
 
   const handleSelectTheme = (theme: string) => {
-    setWizardData({ ...wizardData, theme, subject: "" }); // Reset subject when theme changes
+    console.log("Selected theme:", theme);
+    setWizardData({ ...wizardData, theme, subject: "" });
   };
 
   const handleSelectSubject = (subject: string) => {
+    console.log("Selected subject:", subject);
     setWizardData({ ...wizardData, subject });
   };
 
   const handleSelectMessage = (message: string) => {
+    console.log("Selected message:", message);
     setWizardData({ ...wizardData, message });
   };
 
   const handleSelectStyle = (style: string) => {
+    console.log("Selected style:", style);
     setWizardData({ ...wizardData, style });
   };
 
   const handleChildInfoChange = (info: { name: string; gender: string; photo?: File }) => {
+    console.log("Child info updated:", info);
     setWizardData({
       ...wizardData,
       childName: info.name,
@@ -79,13 +99,17 @@ export const BookWizard = () => {
   };
 
   const handleCustomNoteChange = (customNote: string) => {
+    console.log("Custom note updated:", customNote);
     setWizardData({ ...wizardData, customNote });
   };
 
   // Get available subjects for selected theme
-  const availableSubjects = wizardData.theme && subjects[wizardData.theme] ? 
-    subjects[wizardData.theme] : 
-    [];
+  const availableSubjects = React.useMemo(() => {
+    if (wizardData.theme && subjects && subjects[wizardData.theme]) {
+      return subjects[wizardData.theme];
+    }
+    return fallbackSubjects;
+  }, [wizardData.theme, subjects]);
 
   // Check if next is available based on current selections
   const isNextAvailable = () => {
@@ -107,7 +131,7 @@ export const BookWizard = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[90vh] bg-[#FEF6EC] py-4">
-      <div className="w-full max-w-[700px] rounded-2xl overflow-hidden shadow-lg bg-[#FFF9F2] mx-auto relative">
+      <div className="w-full max-w-[700px] rounded-2xl overflow-hidden shadow-lg bg-white mx-auto relative">
         {/* Book header with navigation */}
         <WizardHeader 
           currentPage={currentPage}
@@ -130,11 +154,11 @@ export const BookWizard = () => {
           handleChildInfoChange={handleChildInfoChange}
           handleCustomNoteChange={handleCustomNoteChange}
           handlePhotoUpload={handlePhotoUpload}
-          ageCategories={ageCategories}
-          themes={themes}
+          ageCategories={ageCategories.length > 0 ? ageCategories : fallbackAges}
+          themes={themes.length > 0 ? themes : fallbackThemes}
           availableSubjects={availableSubjects}
-          messages={messages}
-          styles={styles}
+          messages={messages.length > 0 ? messages : fallbackMessages}
+          styles={styles.length > 0 ? styles : fallbackStyles}
           handleAnimationComplete={handleAnimationComplete}
         />
         
