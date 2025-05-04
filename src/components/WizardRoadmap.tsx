@@ -1,7 +1,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { CakeIcon, BookIcon, CameraIcon, CheckIcon } from "lucide-react";
+import { CakeIcon, BookIcon, CameraIcon, CheckIcon, MessageSquareIcon, PencilIcon, ImageIcon, ShoppingCartIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface WizardRoadmapProps {
@@ -15,12 +15,16 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
   totalSteps,
   onStepClick,
 }) => {
-  // Define step data
+  // Define step data with all the new steps
   const steps = [
     { id: 1, icon: CakeIcon, label: "Age" },
-    { id: 2, icon: BookIcon, label: "Story Elements" },
-    { id: 3, icon: CameraIcon, label: "Photo & Style" },
-    { id: 4, icon: CheckIcon, label: "Review" },
+    { id: 2, icon: BookIcon, label: "Theme" },
+    { id: 3, icon: PencilIcon, label: "Subject" },
+    { id: 4, icon: MessageSquareIcon, label: "Message" },
+    { id: 5, icon: PencilIcon, label: "Custom Note" },
+    { id: 6, icon: ImageIcon, label: "Photo & Style" },
+    { id: 7, icon: CameraIcon, label: "Preview" },
+    { id: 8, icon: ShoppingCartIcon, label: "Checkout" },
   ];
 
   // Calculate progress percentage
@@ -29,10 +33,10 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
   return (
     <nav 
       aria-label="Form progress" 
-      className="w-full mb-10"
+      className="w-full mb-10 overflow-x-auto"
     >
       {/* Desktop View */}
-      <div className="hidden sm:flex flex-col relative px-8">
+      <div className="hidden sm:flex flex-col relative px-8 min-w-max">
         {/* Connector line */}
         <div className="absolute top-5 left-0 w-full h-1 bg-gray-200 rounded-full z-0 mx-auto" style={{ width: "calc(100% - 4rem)" }}>
           <motion.div 
@@ -44,10 +48,11 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
         </div>
         
         {/* Icons */}
-        <div className="flex justify-between relative z-10">
+        <div className="flex justify-between relative z-10" style={{ gap: "48px" }}>
           {steps.map((step, index) => {
             const isCompleted = step.id <= currentStep;
             const isActive = step.id === currentStep;
+            const isClickable = step.id <= currentStep + 1;
             
             return (
               <motion.div 
@@ -58,14 +63,16 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
                 transition={{ duration: 0.3, delay: index * 0.15 }}
               >
                 <motion.button
+                  disabled={!isClickable}
                   aria-label={`Step ${step.id} of ${totalSteps}: ${step.label}`}
                   aria-current={isActive ? "step" : undefined}
                   className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer",
+                    "w-10 h-10 rounded-full flex items-center justify-center transition-all", 
+                    isClickable ? "cursor-pointer" : "cursor-not-allowed",
                     isCompleted ? "bg-persimmon hover:bg-persimmon/90" : "bg-gray-200 hover:bg-gray-300"
                   )}
-                  onClick={() => onStepClick?.(step.id)}
-                  whileHover={{ scale: 1.05 }}
+                  onClick={() => isClickable && onStepClick?.(step.id)}
+                  whileHover={isClickable ? { scale: 1.05 } : {}}
                   animate={isActive ? { scale: [1.1, 1] } : {}}
                   transition={{ duration: 0.2 }}
                 >
@@ -75,6 +82,9 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
                   )} />
                 </motion.button>
                 <span className="mt-6 text-xs font-bold text-darkText">{step.label}</span>
+                {isClickable && (
+                  <span className="roadmap-tooltip">Go to step {step.id}</span>
+                )}
               </motion.div>
             );
           })}
@@ -86,6 +96,7 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
         {steps.map((step, index) => {
           const isCompleted = step.id <= currentStep;
           const isActive = step.id === currentStep;
+          const isClickable = step.id <= currentStep + 1;
           
           return (
             <div key={step.id} className="flex items-center mb-4 last:mb-0">
@@ -102,13 +113,15 @@ const WizardRoadmap: React.FC<WizardRoadmapProps> = ({
               )}
               
               <motion.button
+                disabled={!isClickable}
                 aria-label={`Step ${step.id} of ${totalSteps}: ${step.label}`}
                 aria-current={isActive ? "step" : undefined}
                 className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center z-10 mr-3",
+                  isClickable ? "cursor-pointer" : "cursor-not-allowed",
                   isCompleted ? "bg-persimmon" : "bg-gray-200"
                 )}
-                onClick={() => onStepClick?.(step.id)}
+                onClick={() => isClickable && onStepClick?.(step.id)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: index * 0.15 }}

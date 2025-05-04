@@ -9,7 +9,177 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      age_categories: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      story_images: {
+        Row: {
+          id: string
+          image_url: string
+          page_number: number
+          storybook_id: string | null
+        }
+        Insert: {
+          id?: string
+          image_url: string
+          page_number: number
+          storybook_id?: string | null
+        }
+        Update: {
+          id?: string
+          image_url?: string
+          page_number?: number
+          storybook_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_images_storybook_id_fkey"
+            columns: ["storybook_id"]
+            isOneToOne: false
+            referencedRelation: "storybooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storybooks: {
+        Row: {
+          age_category: string
+          author_id: string | null
+          created_at: string | null
+          custom_note: string | null
+          id: string
+          message: string
+          pdf_url: string | null
+          photo_url: string | null
+          status: string
+          style: string
+          subject: string
+          theme: string
+        }
+        Insert: {
+          age_category: string
+          author_id?: string | null
+          created_at?: string | null
+          custom_note?: string | null
+          id?: string
+          message: string
+          pdf_url?: string | null
+          photo_url?: string | null
+          status?: string
+          style: string
+          subject: string
+          theme: string
+        }
+        Update: {
+          age_category?: string
+          author_id?: string | null
+          created_at?: string | null
+          custom_note?: string | null
+          id?: string
+          message?: string
+          pdf_url?: string | null
+          photo_url?: string | null
+          status?: string
+          style?: string
+          subject?: string
+          theme?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storybooks_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      styles: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
+      subjects: {
+        Row: {
+          name: string
+          theme: string
+        }
+        Insert: {
+          name: string
+          theme: string
+        }
+        Update: {
+          name?: string
+          theme?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subjects_theme_fkey"
+            columns: ["theme"]
+            isOneToOne: false
+            referencedRelation: "themes"
+            referencedColumns: ["name"]
+          },
+        ]
+      }
+      themes: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
