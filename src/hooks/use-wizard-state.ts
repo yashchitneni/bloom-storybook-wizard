@@ -36,6 +36,8 @@ export const useWizardState = () => {
     const fetchLookupData = async () => {
       setIsLoading(true);
       try {
+        console.log("Fetching data from Supabase...");
+        
         // Fetch themes
         const { data: themesData, error: themesError } = await supabase
           .from('themes')
