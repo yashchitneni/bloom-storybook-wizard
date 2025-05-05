@@ -46,7 +46,7 @@ export const useWizardSubmission = (
         childPhotoUrl = childPhotoPath;
       }
 
-      // Insert storybook record
+      // Insert storybook record with all required fields
       const { data: storybookData, error: storybookError } = await supabase
         .from("storybooks")
         .insert({
