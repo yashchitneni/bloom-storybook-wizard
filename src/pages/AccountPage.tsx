@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import { getFileUrl } from '@/utils/storage-utils';
 import { PlusCircle, Download, Book } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface Storybook {
   id: string;
