@@ -65,24 +65,7 @@ export const useWizardSubmission = (
           moral: wizardData.moral || null,
           status: "draft", // Default status is draft
         })
-        .select(`
-          id, 
-          author_id, 
-          theme, 
-          subject, 
-          message, 
-          custom_note, 
-          age_category, 
-          style, 
-          child_name, 
-          child_gender, 
-          child_photo_url,
-          photo_url,
-          moral,
-          status, 
-          pdf_url, 
-          created_at
-        `)
+        .select('*')  // Select all columns to avoid missing fields
         .single();
 
       if (storybookError) {
@@ -93,7 +76,11 @@ export const useWizardSubmission = (
         throw new Error('No data returned after storybook creation');
       }
 
+      // Safely access the ID
       const storybookId = storybookData.id;
+      if (!storybookId) {
+        throw new Error('No storybook ID was returned');
+      }
 
       // Upload and associate character photos
       for (const character of wizardData.characters) {

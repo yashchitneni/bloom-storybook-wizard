@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,24 +27,7 @@ const AccountPage = () => {
       try {
         const { data, error } = await supabase
           .from('storybooks')
-          .select(`
-            id, 
-            author_id, 
-            theme, 
-            subject, 
-            message, 
-            custom_note, 
-            age_category, 
-            style, 
-            child_name, 
-            child_gender, 
-            child_photo_url, 
-            status, 
-            pdf_url, 
-            photo_url, 
-            created_at,
-            moral
-          `)
+          .select('*') // Select all columns to avoid missing fields
           .eq('author_id', user?.id)
           .order('created_at', { ascending: false });
           
@@ -60,10 +42,24 @@ const AccountPage = () => {
         }
         
         if (data) {
-          // Make sure child_name is defined for each storybook
+          // Process the data - ensure each item has the expected properties
           const processedData = data.map(book => ({
-            ...book,
-            child_name: book.child_name || 'Your Child' // Provide a default if child_name is missing
+            id: book.id || '',
+            author_id: book.author_id,
+            theme: book.theme || '',
+            subject: book.subject || '',
+            message: book.message || '',
+            custom_note: book.custom_note,
+            age_category: book.age_category || '',
+            style: book.style || '',
+            child_name: book.child_name || 'Your Child',
+            child_gender: book.child_gender || '',
+            child_photo_url: book.child_photo_url,
+            status: book.status || 'draft',
+            pdf_url: book.pdf_url,
+            photo_url: book.photo_url,
+            created_at: book.created_at || new Date().toISOString(),
+            moral: book.moral || ''
           }));
           setStorybooks(processedData);
         }
