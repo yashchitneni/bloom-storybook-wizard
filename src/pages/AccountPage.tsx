@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,7 +51,14 @@ const AccountPage = () => {
           return;
         }
         
-        setStorybooks(data || []);
+        if (data) {
+          // Make sure child_name is defined for each storybook
+          const processedData = data.map(book => ({
+            ...book,
+            child_name: book.child_name || 'Your Child' // Provide a default if child_name is missing
+          }));
+          setStorybooks(processedData);
+        }
       } catch (err) {
         console.error("Error in storybooks fetch:", err);
       } finally {
