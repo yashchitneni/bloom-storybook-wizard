@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,7 +59,7 @@ const AccountPage = () => {
             ...book,
             child_name: book.child_name || 'Your Child' // Provide a default if child_name is missing
           }));
-          setStorybooks(processedData);
+          setStorybooks(processedData as Storybook[]);
         }
       } catch (err) {
         console.error("Error in storybooks fetch:", err);
@@ -207,43 +208,3 @@ const AccountPage = () => {
 };
 
 export default AccountPage;
-
-const Button = ({ 
-  children, 
-  onClick, 
-  size = 'md',
-  className = '',
-  variant = 'default',
-  disabled = false,
-  type = 'button'
-}: { 
-  children: React.ReactNode; 
-  onClick?: () => void;
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-  variant?: 'default' | 'outline';
-  disabled?: boolean;
-  type?: 'button' | 'submit' | 'reset';
-}) => {
-  const sizeClasses = {
-    sm: 'py-1.5 px-3 text-sm',
-    md: 'py-2 px-6',
-    lg: 'py-3 px-8 text-lg',
-  };
-  
-  const variantClasses = {
-    default: 'bg-persimmon text-white hover:bg-persimmon/90',
-    outline: 'bg-white text-persimmon border border-persimmon hover:bg-persimmon/10',
-  };
-  
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`font-bold rounded-full transition-colors ${sizeClasses[size]} ${variantClasses[variant]} ${disabled ? 'opacity-60 cursor-not-allowed' : ''} ${className}`}
-    >
-      {children}
-    </button>
-  );
-};
