@@ -12,14 +12,20 @@ import { Button } from '@/components/ui/button';
 
 interface Storybook {
   id: string;
+  author_id: string | null;
   theme: string;
   subject: string;
+  message: string;
+  custom_note: string | null;
   age_category: string;
-  created_at: string;
+  style: string;
+  child_name: string;
+  child_gender: string;
+  child_photo_url: string | null;
   status: string;
   pdf_url: string | null;
   photo_url: string | null;
-  child_name: string;
+  created_at: string;
 }
 
 const AccountPage = () => {
@@ -39,7 +45,23 @@ const AccountPage = () => {
       try {
         const { data, error } = await supabase
           .from('storybooks')
-          .select('*')
+          .select(`
+            id, 
+            author_id, 
+            theme, 
+            subject, 
+            message, 
+            custom_note, 
+            age_category, 
+            style, 
+            child_name, 
+            child_gender, 
+            child_photo_url, 
+            status, 
+            pdf_url, 
+            photo_url, 
+            created_at
+          `)
           .eq('author_id', user?.id)
           .order('created_at', { ascending: false });
           
@@ -59,7 +81,7 @@ const AccountPage = () => {
             ...book,
             child_name: book.child_name || 'Your Child' // Provide a default if child_name is missing
           }));
-          setStorybooks(processedData as Storybook[]);
+          setStorybooks(processedData);
         }
       } catch (err) {
         console.error("Error in storybooks fetch:", err);

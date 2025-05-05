@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -59,11 +58,28 @@ export const useWizardSubmission = (
           style: wizardData.style,
           child_name: wizardData.childName,
           child_gender: wizardData.childGender,
-          photo_url: childPhotoUrl,
+          child_photo_url: childPhotoUrl,
+          photo_url: childPhotoUrl, // Using the same photo for now, adjust if needed
           email: wizardData.email,
           status: "draft", // Default status is draft
         })
-        .select()
+        .select(`
+          id, 
+          author_id, 
+          theme, 
+          subject, 
+          message, 
+          custom_note, 
+          age_category, 
+          style, 
+          child_name, 
+          child_gender, 
+          child_photo_url, 
+          status, 
+          pdf_url, 
+          photo_url, 
+          created_at
+        `)
         .single();
 
       if (storybookError) {

@@ -15,6 +15,8 @@ interface Storybook {
   status: string;
   created_at: string;
   photo_path: string | null;
+  child_gender: string;
+  child_photo_url: string | null;
 }
 
 export const UserStorybooks = () => {
@@ -28,11 +30,20 @@ export const UserStorybooks = () => {
       const fetchStorybooks = async () => {
         setIsLoading(true);
         try {
-          // Use the any type to work around the type issues temporarily
-          // This will be properly typed when Supabase types are updated
-          const { data, error } = await (supabase as any)
+          const { data, error } = await supabase
             .from('storybooks')
-            .select('*')
+            .select(`
+              id,
+              child_name,
+              theme,
+              moral,
+              style,
+              status,
+              created_at,
+              photo_url as photo_path,
+              child_gender,
+              child_photo_url
+            `)
             .order('created_at', { ascending: false });
 
           if (error) {

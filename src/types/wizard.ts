@@ -1,3 +1,4 @@
+
 export interface WizardData {
   age: string;
   theme: string;
@@ -11,13 +12,13 @@ export interface WizardData {
   moral?: string;
   specialDetails?: string;
   
-  // New fields for child profile
+  // Child profile fields
   childName: string;
   childGender: string;
   childPhotoFile: File | null;
   childPhotoPreview: string | null;
   
-  // New fields for additional characters
+  // Additional characters
   characters: Character[];
 }
 
