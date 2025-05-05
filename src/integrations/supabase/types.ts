@@ -21,6 +21,44 @@ export type Database = {
         }
         Relationships: []
       }
+      characters: {
+        Row: {
+          gender: string
+          id: string
+          is_main: boolean | null
+          name: string
+          photo_url: string | null
+          relation: string | null
+          storybook_id: string | null
+        }
+        Insert: {
+          gender: string
+          id?: string
+          is_main?: boolean | null
+          name: string
+          photo_url?: string | null
+          relation?: string | null
+          storybook_id?: string | null
+        }
+        Update: {
+          gender?: string
+          id?: string
+          is_main?: boolean | null
+          name?: string
+          photo_url?: string | null
+          relation?: string | null
+          storybook_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "characters_storybook_id_fkey"
+            columns: ["storybook_id"]
+            isOneToOne: false
+            referencedRelation: "storybooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           name: string

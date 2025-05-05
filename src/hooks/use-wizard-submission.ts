@@ -16,10 +16,12 @@ export const useWizardSubmission = (
 
   const handleSubmit = async () => {
     // Validation
-    if (!wizardData.email) {
+    if (!wizardData.email || !wizardData.childName || !wizardData.childGender || 
+        !wizardData.age || !wizardData.theme || !wizardData.subject || 
+        !wizardData.message || !wizardData.style) {
       toast({
-        title: "Email required",
-        description: "Please enter your email to place your order.",
+        title: "Missing required fields",
+        description: "Please fill out all required fields to create your storybook.",
         variant: "destructive",
       });
       return;
@@ -32,9 +34,9 @@ export const useWizardSubmission = (
       // Upload files if needed
       let childPhotoUrl = null;
       if (wizardData.childPhotoFile) {
-        const childPhotoPath = `children/${wizardData.childName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+        const childPhotoPath = `uploads/children/${wizardData.childName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
         const { data: childPhotoData, error: childUploadError } = await supabase.storage
-          .from("uploads")
+          .from("images")
           .upload(childPhotoPath, wizardData.childPhotoFile);
 
         if (childUploadError) {
@@ -57,7 +59,9 @@ export const useWizardSubmission = (
           style: wizardData.style,
           child_name: wizardData.childName,
           child_gender: wizardData.childGender,
-          child_photo_url: childPhotoUrl,
+          photo_url: childPhotoUrl,
+          email: wizardData.email,
+          status: "draft", // Default status is draft
         })
         .select()
         .single();
@@ -78,9 +82,9 @@ export const useWizardSubmission = (
         let characterPhotoUrl = null;
         
         if (character.photoFile) {
-          const characterPhotoPath = `characters/${character.name.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+          const characterPhotoPath = `uploads/characters/${character.name.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
           const { data: characterUploadData, error: characterUploadError } = await supabase.storage
-            .from("uploads")
+            .from("images")
             .upload(characterPhotoPath, character.photoFile);
 
           if (characterUploadError) {
@@ -91,17 +95,16 @@ export const useWizardSubmission = (
           characterPhotoUrl = characterPhotoPath;
         }
 
-        // Using type assertion to bypass TypeScript checking since the characters table 
-        // exists in the database but is not yet in the TypeScript types
-        const { error: characterInsertError } = await (supabase
-          .from('characters' as any)
+        // Insert character record
+        const { error: characterInsertError } = await supabase
+          .from('characters')
           .insert({
             storybook_id: storybookId,
             name: character.name,
             relation: character.relation,
             gender: character.gender,
             photo_url: characterPhotoUrl
-          }));
+          });
 
         if (characterInsertError) {
           console.error(`Character insert failed: ${characterInsertError.message}`);
@@ -110,7 +113,7 @@ export const useWizardSubmission = (
 
       // Success toast
       toast({
-        title: "Order submitted successfully!",
+        title: "Story created successfully!",
         description: "We'll start creating your personalized storybook right away.",
       });
 
@@ -134,13 +137,19 @@ export const useWizardSubmission = (
         characters: []
       });
 
-      // Navigate to success/thank you page or account page
-      navigate("/account");
+      // Redirect based on login status
+      if (user) {
+        // If logged in, go to account page
+        navigate("/account");
+      } else {
+        // If not logged in, go to signup page with storybook ID and email
+        navigate(`/signup?storybook_id=${storybookId}&email=${encodeURIComponent(wizardData.email)}`);
+      }
     } catch (err: any) {
       console.error("Order submission error:", err);
       setError(err.message);
       toast({
-        title: "Order submission failed",
+        title: "Story creation failed",
         description: err.message,
         variant: "destructive",
       });

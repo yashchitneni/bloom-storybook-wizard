@@ -12,6 +12,7 @@ import WizardPage from "./pages/WizardPage";
 import AccountPage from "./pages/AccountPage";
 import StoryDetailPage from "./pages/StoryDetailPage";
 import ExamplePage from "./pages/ExamplePage";
+import SignupPage from "./pages/SignupPage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/signup" element={<SignupPage />} />
             <Route path="/wizard" element={<WizardPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/story/:id" element={<StoryDetailPage />} />
