@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -61,6 +62,7 @@ export const useWizardSubmission = (
           child_photo_url: childPhotoUrl,
           photo_url: childPhotoUrl, // Using the same photo for now, adjust if needed
           email: wizardData.email,
+          moral: wizardData.moral || null,
           status: "draft", // Default status is draft
         })
         .select(`
@@ -74,16 +76,21 @@ export const useWizardSubmission = (
           style, 
           child_name, 
           child_gender, 
-          child_photo_url, 
+          child_photo_url,
+          photo_url,
+          moral,
           status, 
           pdf_url, 
-          photo_url, 
           created_at
         `)
         .single();
 
       if (storybookError) {
         throw new Error(`Storybook creation failed: ${storybookError.message}`);
+      }
+
+      if (!storybookData) {
+        throw new Error('No data returned after storybook creation');
       }
 
       const storybookId = storybookData.id;

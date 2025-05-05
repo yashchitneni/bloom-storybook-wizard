@@ -9,24 +9,7 @@ import { getFileUrl } from '@/utils/storage-utils';
 import { PlusCircle, Download, Book } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-
-interface Storybook {
-  id: string;
-  author_id: string | null;
-  theme: string;
-  subject: string;
-  message: string;
-  custom_note: string | null;
-  age_category: string;
-  style: string;
-  child_name: string;
-  child_gender: string;
-  child_photo_url: string | null;
-  status: string;
-  pdf_url: string | null;
-  photo_url: string | null;
-  created_at: string;
-}
+import { Storybook } from '@/types/wizard';
 
 const AccountPage = () => {
   const { user } = useAuth();
@@ -60,7 +43,8 @@ const AccountPage = () => {
             status, 
             pdf_url, 
             photo_url, 
-            created_at
+            created_at,
+            moral
           `)
           .eq('author_id', user?.id)
           .order('created_at', { ascending: false });

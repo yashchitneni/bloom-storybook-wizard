@@ -5,19 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Card from "./Card";
 import { useStorageBucket } from "@/hooks/use-storage-bucket";
 import { getFileUrl } from "@/utils/storage-utils";
-
-interface Storybook {
-  id: string;
-  child_name: string;
-  theme: string;
-  moral: string;
-  style: string;
-  status: string;
-  created_at: string;
-  photo_path: string | null;
-  child_gender: string;
-  child_photo_url: string | null;
-}
+import { Storybook } from "@/types/wizard";
 
 export const UserStorybooks = () => {
   const [storybooks, setStorybooks] = useState<Storybook[]>([]);
@@ -40,9 +28,12 @@ export const UserStorybooks = () => {
               style,
               status,
               created_at,
-              photo_url as photo_path,
+              photo_url,
               child_gender,
-              child_photo_url
+              child_photo_url,
+              subject,
+              age_category,
+              pdf_url
             `)
             .order('created_at', { ascending: false });
 
@@ -131,9 +122,9 @@ export const UserStorybooks = () => {
         {storybooks.map((book) => (
           <Card key={book.id} className="overflow-hidden flex flex-col">
             <div className="h-40 bg-gray-100 flex items-center justify-center">
-              {book.photo_path ? (
+              {book.photo_url ? (
                 <img 
-                  src={getFileUrl(book.photo_path)} 
+                  src={getFileUrl(book.photo_url)} 
                   alt={`${book.child_name}'s storybook`}
                   className="w-full h-full object-cover"
                 />
@@ -149,7 +140,7 @@ export const UserStorybooks = () => {
                 </div>
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                For {book.child_name}, teaching {book.moral}
+                For {book.child_name}, teaching {book.moral || 'important lessons'}
               </p>
               <p className="text-xs mt-4">
                 Created {new Date(book.created_at).toLocaleDateString()}

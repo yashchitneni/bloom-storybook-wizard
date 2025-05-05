@@ -1,4 +1,3 @@
-
 export interface WizardData {
   age: string;
   theme: string;
@@ -29,6 +28,25 @@ export interface Character {
   gender: string;
   photoFile: File | null;
   photoPreview: string | null;
+}
+
+export interface Storybook {
+  id: string;
+  author_id: string | null;
+  theme: string;
+  subject: string;
+  message: string;
+  custom_note: string | null;
+  age_category: string;
+  style: string;
+  child_name: string;
+  child_gender: string;
+  child_photo_url: string | null;
+  status: string;
+  pdf_url: string | null;
+  photo_url: string | null;
+  created_at: string;
+  moral?: string;
 }
 
 export interface AgeSelectionStepProps {
