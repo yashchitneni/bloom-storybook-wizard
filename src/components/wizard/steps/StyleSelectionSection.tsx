@@ -16,6 +16,12 @@ const StyleSelectionSection: React.FC<StyleSelectionSectionProps> = ({
   styles,
   isActive
 }) => {
+  // Create a wrapped handler to add logging
+  const handleStyleSelect = (style: string) => {
+    console.log("Style selected:", style);
+    onSelectStyle(style);
+  };
+  
   return (
     <motion.section 
       id="step-6"
@@ -26,7 +32,7 @@ const StyleSelectionSection: React.FC<StyleSelectionSectionProps> = ({
     >
       <h3 className="text-xl font-bold font-poppins">Choose Illustration Style</h3>
       <StyleSelectionCard
-        onSelectStyle={onSelectStyle}
+        onSelectStyle={handleStyleSelect}
         selectedStyle={selectedStyle}
         styles={styles}
         isActive={isActive}

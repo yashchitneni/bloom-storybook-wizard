@@ -19,6 +19,17 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   isSubmitting,
   isActive
 }) => {
+  // Create wrapped handlers to add logging
+  const handleEmailChange = (email: string) => {
+    console.log("Email changed:", email);
+    onEmailChange(email);
+  };
+  
+  const handleSubmit = () => {
+    console.log("Submitting wizard with data:", wizardData);
+    onSubmit();
+  };
+  
   return (
     <motion.section 
       id="step-10"
@@ -30,8 +41,8 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
       <h3 className="text-xl font-bold">Complete Your Order</h3>
       <CheckoutCard
         wizardData={wizardData}
-        onEmailChange={onEmailChange}
-        onSubmit={onSubmit}
+        onEmailChange={handleEmailChange}
+        onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
         isActive={true}
       />

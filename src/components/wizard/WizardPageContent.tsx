@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useWizardState } from '@/hooks/wizard/use-wizard-state';
 import AgeSelectionSection from '@/components/wizard/steps/AgeSelectionSection';
@@ -41,38 +40,47 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
   
   // Handlers for each step
   const handleSelectAge = (age: string) => {
+    console.log("Setting age in wizardData:", age);
     setWizardData({ ...wizardData, age });
   };
 
   const handleSelectTheme = (theme: string) => {
+    console.log("Setting theme in wizardData:", theme);
     setWizardData({ ...wizardData, theme, subject: "" }); // Reset subject when theme changes
   };
 
   const handleSelectSubject = (subject: string) => {
+    console.log("Setting subject in wizardData:", subject);
     setWizardData({ ...wizardData, subject });
   };
 
   const handleSelectMessage = (message: string) => {
+    console.log("Setting message in wizardData:", message);
     setWizardData({ ...wizardData, message });
   };
 
   const handleCustomNoteChange = (customNote: string) => {
+    console.log("Setting customNote in wizardData:", customNote);
     setWizardData({ ...wizardData, customNote });
   };
 
   const handleSelectStyle = (style: string) => {
+    console.log("Setting style in wizardData:", style);
     setWizardData({ ...wizardData, style });
   };
   
   const handleChildNameChange = (childName: string) => {
+    console.log("Setting childName in wizardData:", childName);
     setWizardData({ ...wizardData, childName });
   };
   
   const handleChildGenderChange = (childGender: string) => {
+    console.log("Setting childGender in wizardData:", childGender);
     setWizardData({ ...wizardData, childGender });
   };
 
   const handleEmailChange = (email: string) => {
+    console.log("Setting email in wizardData:", email);
     setWizardData({ ...wizardData, email });
   };
 
@@ -86,6 +94,15 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
     wizardData.childPhotoPreview
   );
 
+  // Log when isChildProfileComplete changes
+  useEffect(() => {
+    console.log("Child profile complete:", isChildProfileComplete, {
+      childName: wizardData.childName,
+      childGender: wizardData.childGender,
+      childPhotoPreview: wizardData.childPhotoPreview ? "present" : "missing"
+    });
+  }, [wizardData.childName, wizardData.childGender, wizardData.childPhotoPreview]);
+
   // Handle continue button click
   const handleContinueClick = () => {
     const nextEmptyStep = !wizardData.age ? 1 : 
@@ -94,6 +111,7 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
                         !wizardData.message ? 4 :
                         !wizardData.style ? 6 :
                         !isChildProfileComplete ? 7 : 8;
+    console.log("Continue clicked, going to next empty step:", nextEmptyStep);
     const element = document.getElementById(`step-${nextEmptyStep}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -117,6 +135,18 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
       </div>
     );
   }
+
+  // Debug log the overall state of wizardData
+  console.log("WizardPageContent rendering with data:", {
+    age: wizardData.age,
+    theme: wizardData.theme,
+    subject: wizardData.subject,
+    message: wizardData.message,
+    style: wizardData.style,
+    email: wizardData.email,
+    childName: wizardData.childName,
+    childGender: wizardData.childGender
+  });
 
   return (
     <div className="bg-cream rounded-xl p-6 md:p-10 shadow-sm" id="wizard-container">

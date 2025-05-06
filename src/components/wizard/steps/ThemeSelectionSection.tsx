@@ -16,6 +16,12 @@ const ThemeSelectionSection: React.FC<ThemeSelectionSectionProps> = ({
   themes,
   isActive
 }) => {
+  // Create a wrapped handler to add logging
+  const handleThemeSelect = (theme: string) => {
+    console.log("Theme selected:", theme);
+    onSelectTheme(theme);
+  };
+  
   return (
     <motion.section 
       id="step-2"
@@ -26,7 +32,7 @@ const ThemeSelectionSection: React.FC<ThemeSelectionSectionProps> = ({
     >
       <h3 className="text-xl font-bold">Choose a Theme</h3>
       <ThemeCard
-        onSelectTheme={onSelectTheme}
+        onSelectTheme={handleThemeSelect}
         selectedTheme={selectedTheme}
         themes={themes}
         isActive={true}

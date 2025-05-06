@@ -16,6 +16,12 @@ const AgeSelectionSection: React.FC<AgeSelectionSectionProps> = ({
   ageCategories,
   isActive
 }) => {
+  // Create a wrapped handler to add logging
+  const handleAgeSelect = (age: string) => {
+    console.log("Age selected:", age);
+    onSelectAge(age);
+  };
+  
   return (
     <motion.section 
       id="step-1" 
@@ -26,7 +32,7 @@ const AgeSelectionSection: React.FC<AgeSelectionSectionProps> = ({
     >
       <h3 className="text-xl font-bold">Choose the Age Category</h3>
       <AgeCard 
-        onSelectAge={onSelectAge}
+        onSelectAge={handleAgeSelect}
         selectedAge={selectedAge}
         ageCategories={ageCategories}
         isActive={true}

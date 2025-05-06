@@ -15,6 +15,9 @@ export const useWizardSubmission = (
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    // Add logging to check wizardData on submit
+    console.log("wizardData on submit:", wizardData);
+    
     // Improved validation with specific field names
     const requiredFields = [
       { key: "age", label: "Age" },

@@ -29,9 +29,15 @@ export const useWizardData = () => {
   });
   const { user } = useAuth();
   
+  // Add logging whenever wizardData changes
+  useEffect(() => {
+    console.log("wizardData updated:", wizardData);
+  }, [wizardData]);
+  
   // Pre-fill email from user if authenticated
   useEffect(() => {
     if (user?.email && !wizardData.email) {
+      console.log("Setting email from user:", user?.email);
       setWizardData(prev => ({
         ...prev,
         email: user.email || ""

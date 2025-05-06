@@ -22,6 +22,22 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
   childPhotoPreview,
   isActive
 }) => {
+  // Create wrapped handlers to add logging
+  const handleChildNameChange = (name: string) => {
+    console.log("Child name changed:", name);
+    onChildNameChange(name);
+  };
+  
+  const handleChildGenderChange = (gender: string) => {
+    console.log("Child gender changed:", gender);
+    onChildGenderChange(gender);
+  };
+  
+  const handleChildPhotoUpload = (file: File) => {
+    console.log("Child photo uploaded:", file.name);
+    onChildPhotoUpload(file);
+  };
+  
   return (
     <motion.section 
       id="step-7"
@@ -32,9 +48,9 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
     >
       <h3 className="text-xl font-bold">Your Child</h3>
       <ChildProfileCard
-        onChildNameChange={onChildNameChange}
-        onChildGenderChange={onChildGenderChange}
-        onChildPhotoUpload={onChildPhotoUpload}
+        onChildNameChange={handleChildNameChange}
+        onChildGenderChange={handleChildGenderChange}
+        onChildPhotoUpload={handleChildPhotoUpload}
         childName={childName}
         childGender={childGender}
         childPhotoPreview={childPhotoPreview}

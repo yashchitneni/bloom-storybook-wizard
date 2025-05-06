@@ -18,6 +18,12 @@ const SubjectSelectionSection: React.FC<SubjectSelectionSectionProps> = ({
   subjects,
   isActive
 }) => {
+  // Create a wrapped handler to add logging
+  const handleSubjectSelect = (subject: string) => {
+    console.log("Subject selected:", subject);
+    onSelectSubject(subject);
+  };
+  
   return (
     <motion.section 
       id="step-3"
@@ -28,7 +34,7 @@ const SubjectSelectionSection: React.FC<SubjectSelectionSectionProps> = ({
     >
       <h3 className="text-xl font-bold">Choose a Subject</h3>
       <SubjectCard
-        onSelectSubject={onSelectSubject}
+        onSelectSubject={handleSubjectSelect}
         selectedTheme={selectedTheme}
         selectedSubject={selectedSubject}
         subjects={subjects}

@@ -16,6 +16,12 @@ const MessageSelectionSection: React.FC<MessageSelectionSectionProps> = ({
   messages,
   isActive
 }) => {
+  // Create a wrapped handler to add logging
+  const handleMessageSelect = (message: string) => {
+    console.log("Message selected:", message);
+    onSelectMessage(message);
+  };
+  
   return (
     <motion.section 
       id="step-4"
@@ -26,7 +32,7 @@ const MessageSelectionSection: React.FC<MessageSelectionSectionProps> = ({
     >
       <h3 className="text-xl font-bold">What's the central message of the story?</h3>
       <MessageCard
-        onSelectMessage={onSelectMessage}
+        onSelectMessage={handleMessageSelect}
         selectedMessage={selectedMessage}
         messages={messages}
         isActive={true}
