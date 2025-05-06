@@ -15,13 +15,26 @@ export const useWizardSubmission = (
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    // Validation
-    if (!wizardData.email || !wizardData.childName || !wizardData.childGender || 
-        !wizardData.age || !wizardData.theme || !wizardData.subject || 
-        !wizardData.message || !wizardData.style) {
+    // Improved validation with specific field names
+    const requiredFields = [
+      { key: "age", label: "Age" },
+      { key: "theme", label: "Theme" },
+      { key: "subject", label: "Subject" },
+      { key: "message", label: "Message" },
+      { key: "style", label: "Style" },
+      { key: "email", label: "Email" },
+      { key: "childName", label: "Child's Name" },
+      { key: "childGender", label: "Child's Gender" },
+    ];
+
+    const missingFields = requiredFields
+      .filter(field => !wizardData[field.key as keyof WizardData])
+      .map(field => field.label);
+
+    if (missingFields.length > 0) {
       toast({
         title: "Missing required fields",
-        description: "Please fill out all required fields to create your storybook.",
+        description: `Please fill out the following fields: ${missingFields.join(", ")}`,
         variant: "destructive",
       });
       return;
