@@ -27,6 +27,7 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   
   const handleSubmit = () => {
     console.log("Submitting wizard with data:", wizardData);
+    // Call onSubmit which will get the latest wizardData through the getter function
     onSubmit();
   };
   

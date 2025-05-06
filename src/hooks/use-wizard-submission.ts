@@ -6,7 +6,7 @@ import { WizardData } from "@/types/wizard";
 import { useNavigate } from "react-router-dom";
 
 export const useWizardSubmission = (
-  wizardData: WizardData,
+  getWizardData: () => WizardData, // Changed to a function that returns the latest state
   setWizardData: React.Dispatch<React.SetStateAction<WizardData>>,
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>,
   user: any
@@ -15,6 +15,9 @@ export const useWizardSubmission = (
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    // Get the latest state when the submit button is clicked
+    const wizardData = getWizardData();
+    
     // Add logging to check wizardData on submit
     console.log("wizardData on submit:", wizardData);
     
@@ -40,6 +43,7 @@ export const useWizardSubmission = (
         description: `Please fill out the following fields: ${missingFields.join(", ")}`,
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 

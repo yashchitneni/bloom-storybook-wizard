@@ -17,8 +17,9 @@ const WizardPage = () => {
     isLoading
   } = useWizardState();
   
+  // Pass a function to get the latest wizardData state
   const { handleSubmit } = useWizardSubmission(
-    wizardData,
+    () => wizardData,
     setWizardData,
     setIsSubmitting,
     user
