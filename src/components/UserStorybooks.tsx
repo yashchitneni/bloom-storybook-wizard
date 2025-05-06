@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,14 +20,13 @@ export const UserStorybooks = () => {
         try {
           const { data, error } = await supabase
             .from('storybooks')
-            .select('*') // Select all columns to avoid missing new fields
+            .select('*') // Select all columns to avoid missing fields
             .order('created_at', { ascending: false });
 
           if (error) {
             console.error("Error fetching storybooks:", error);
           } else if (data) {
             // Process the data to ensure each storybook has all the expected properties
-            // even if some are missing from the database
             const processedData = data.map(book => ({
               id: book.id || '',
               author_id: book.author_id,
@@ -36,14 +36,15 @@ export const UserStorybooks = () => {
               custom_note: book.custom_note,
               age_category: book.age_category || '',
               style: book.style || '',
-              child_name: book.child_name || 'Your Child', // Default value if missing
-              child_gender: book.child_gender || '', // Default value if missing
-              child_photo_url: book.child_photo_url || null, // Default value if missing
+              child_name: book.child_name || 'Your Child',
+              child_gender: book.child_gender || '',
+              child_photo_url: book.child_photo_url || null,
               status: book.status || 'draft',
               pdf_url: book.pdf_url,
               photo_url: book.photo_url,
               created_at: book.created_at || new Date().toISOString(),
-              moral: book.moral || '' // Default value if missing
+              moral: book.moral || '',
+              email: book.email || ''
             }));
             setStorybooks(processedData);
           }
@@ -107,6 +108,20 @@ export const UserStorybooks = () => {
     );
   }
 
+  // Helper function
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'processing':
+        return 'bg-amber-500';
+      case 'done':
+        return 'bg-green-500';
+      case 'error':
+        return 'bg-red-500';
+      default:
+        return 'bg-blue-500';
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto my-8">
       <h2 className="text-2xl font-bold mb-4">Your Storybooks</h2>
@@ -150,18 +165,4 @@ export const UserStorybooks = () => {
       </div>
     </div>
   );
-};
-
-// Helper function
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'processing':
-      return 'bg-amber-500';
-    case 'done':
-      return 'bg-green-500';
-    case 'error':
-      return 'bg-red-500';
-    default:
-      return 'bg-blue-500';
-  }
 };

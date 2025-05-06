@@ -47,6 +47,7 @@ export interface Storybook {
   photo_url: string | null;
   created_at: string;
   moral?: string;
+  email?: string;
 }
 
 export interface AgeSelectionStepProps {

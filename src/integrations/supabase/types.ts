@@ -122,10 +122,15 @@ export type Database = {
         Row: {
           age_category: string
           author_id: string | null
+          child_gender: string
+          child_name: string
+          child_photo_url: string | null
           created_at: string | null
           custom_note: string | null
+          email: string
           id: string
           message: string
+          moral: string | null
           pdf_url: string | null
           photo_url: string | null
           status: string
@@ -136,10 +141,15 @@ export type Database = {
         Insert: {
           age_category: string
           author_id?: string | null
+          child_gender?: string
+          child_name?: string
+          child_photo_url?: string | null
           created_at?: string | null
           custom_note?: string | null
+          email?: string
           id?: string
           message: string
+          moral?: string | null
           pdf_url?: string | null
           photo_url?: string | null
           status?: string
@@ -150,10 +160,15 @@ export type Database = {
         Update: {
           age_category?: string
           author_id?: string | null
+          child_gender?: string
+          child_name?: string
+          child_photo_url?: string | null
           created_at?: string | null
           custom_note?: string | null
+          email?: string
           id?: string
           message?: string
+          moral?: string | null
           pdf_url?: string | null
           photo_url?: string | null
           status?: string
