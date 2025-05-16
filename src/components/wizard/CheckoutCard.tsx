@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Button from "../Button";
 import { WizardData } from "@/types/wizard";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -81,24 +80,11 @@ const CheckoutCard: React.FC<CheckoutCardProps> = ({
           </div>
         </div>
         
-        <div className="flex justify-center">
-          <Button
-            onClick={onSubmit}
-            disabled={isSubmitting || !requiredFieldsCompleted()}
-            className="w-full md:w-auto"
-            size="lg"
-          >
-            {isSubmitting ? "Creating Your Story..." : "Create My Story"}
-          </Button>
-        </div>
-        
-        <div>
-          {!requiredFieldsCompleted() && (
-            <p className="text-xs text-center text-red-500">
-              Please complete all required fields before creating your story.
-            </p>
-          )}
-        </div>
+        {!requiredFieldsCompleted() && (
+          <p className="text-xs text-center text-red-500">
+            Please complete all required fields before creating your story.
+          </p>
+        )}
         
         <p className="text-xs text-center text-gray-500">
           By proceeding, you agree to our Terms of Service and Privacy Policy.

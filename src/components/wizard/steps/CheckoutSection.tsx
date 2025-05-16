@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
 import CheckoutCard from '@/components/wizard/CheckoutCard';
@@ -26,11 +25,6 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
     onEmailChange(email);
   };
   
-  const handleSubmit = () => {
-    console.log("Submitting wizard with data:", wizardData);
-    onSubmit();
-  };
-
   // Create a wrapper for the LemonSqueezy checkout
   const handleLemonSqueezyCheckout = () => {
     if (!wizardData.email) {
@@ -103,12 +97,12 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
       <CheckoutCard 
         wizardData={wizardData} 
         onEmailChange={handleEmailChange} 
-        onSubmit={handleSubmit} 
+        onSubmit={onSubmit} 
         isSubmitting={isSubmitting} 
         isActive={true} 
       />
       
-      {/* LemonSqueezy Buy Button */}
+      {/* LemonSqueezy Buy Button - This is the only button we're keeping */}
       <div className="wizard-footer text-center mt-8">
         <button 
           type="button" 
