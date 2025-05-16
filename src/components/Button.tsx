@@ -1,9 +1,7 @@
-
 import React, { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-
 interface ButtonProps {
   children: ReactNode;
   variant?: "primary" | "secondary" | "outline";
@@ -14,7 +12,6 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
 }
-
 const Button = ({
   children,
   variant = "primary",
@@ -23,41 +20,26 @@ const Button = ({
   onClick,
   type = "button",
   disabled = false,
-  className,
+  className
 }: ButtonProps) => {
   const variants = {
     primary: "bg-goldenYellow text-white hover:bg-opacity-90",
     secondary: "bg-mintGreen text-darkText hover:bg-opacity-90",
-    outline: "bg-transparent border border-goldenYellow text-goldenYellow hover:bg-goldenYellow/5",
+    outline: "bg-transparent border border-goldenYellow text-goldenYellow hover:bg-goldenYellow/5"
   };
-
   const sizes = {
     sm: "py-1.5 px-3 text-sm",
     md: "py-2 px-6 text-base",
-    lg: "py-3 px-8 text-lg",
+    lg: "py-3 px-8 text-lg"
   };
-
-  return (
-    <motion.button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "font-poppins font-bold inline-flex items-center justify-center rounded-full transition-all duration-200 shadow-lg",
-        variants[variant],
-        sizes[size],
-        disabled && "opacity-50 cursor-not-allowed",
-        className
-      )}
-      whileHover={!disabled ? { scale: 1.05, boxShadow: "0 0 15px rgba(255, 215, 0, 0.6)" } : {}}
-      whileTap={!disabled ? { scale: 0.98 } : {}}
-    >
-      <span>{children}</span>
-      {withArrow && (
-        <ArrowRight className={cn("ml-2 h-4 w-4")} />
-      )}
-    </motion.button>
-  );
+  return <motion.button type={type} onClick={onClick} disabled={disabled} whileHover={!disabled ? {
+    scale: 1.05,
+    boxShadow: "0 0 15px rgba(255, 215, 0, 0.6)"
+  } : {}} whileTap={!disabled ? {
+    scale: 0.98
+  } : {}} className="">
+      
+      {withArrow && <ArrowRight className={cn("ml-2 h-4 w-4")} />}
+    </motion.button>;
 };
-
 export default Button;
