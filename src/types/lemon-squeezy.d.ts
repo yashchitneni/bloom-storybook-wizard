@@ -8,6 +8,7 @@ interface LemonSqueezyCheckoutOptions {
 
 interface LemonSqueezy {
   open: (options: LemonSqueezyCheckoutOptions) => void;
+  initialize?: () => void;
 }
 
 interface Window {

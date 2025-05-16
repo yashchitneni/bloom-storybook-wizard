@@ -1,7 +1,9 @@
+
 import React, { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+
 interface ButtonProps {
   children: ReactNode;
   variant?: "primary" | "secondary" | "outline";
@@ -12,6 +14,7 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
 }
+
 const Button = ({
   children,
   variant = "primary",
@@ -32,14 +35,32 @@ const Button = ({
     md: "py-2 px-6 text-base",
     lg: "py-3 px-8 text-lg"
   };
-  return <motion.button type={type} onClick={onClick} disabled={disabled} whileHover={!disabled ? {
-    scale: 1.05,
-    boxShadow: "0 0 15px rgba(255, 215, 0, 0.6)"
-  } : {}} whileTap={!disabled ? {
-    scale: 0.98
-  } : {}} className="">
-      
-      {withArrow && <ArrowRight className={cn("ml-2 h-4 w-4")} />}
-    </motion.button>;
+
+  return (
+    <motion.button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      whileHover={!disabled ? {
+        scale: 1.05,
+        boxShadow: "0 0 15px rgba(255, 215, 0, 0.6)"
+      } : {}}
+      whileTap={!disabled ? {
+        scale: 0.98
+      } : {}}
+      className={cn(
+        "rounded-full font-medium transition-all",
+        variants[variant],
+        sizes[size],
+        className
+      )}
+    >
+      <span className="flex items-center justify-center">
+        {children}
+        {withArrow && <ArrowRight className={cn("ml-2 h-4 w-4")} />}
+      </span>
+    </motion.button>
+  );
 };
+
 export default Button;
