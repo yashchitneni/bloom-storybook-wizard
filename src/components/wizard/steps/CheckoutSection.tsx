@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
 import CheckoutCard from '@/components/wizard/CheckoutCard';
@@ -32,31 +33,48 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
       return;
     }
 
-    // Ensure LemonSqueezy is loaded
-    if (window.LemonSqueezy) {
+    try {
       console.log("Opening LemonSqueezy checkout with data:", wizardData);
-      window.LemonSqueezy.open({
-        product: "d751df59-d810-4f21-8fd3-f1e6be65a994",
-        embed: true,
+      
+      // Create a standard LemonSqueezy checkout URL with query parameters
+      const baseUrl = "https://dearkidbooks.lemonsqueezy.com/buy/d751df59-d810-4f21-8fd3-f1e6be65a994";
+      const params = new URLSearchParams({
+        embed: "1",
         email: wizardData.email,
-        custom_data: {
-          childName: wizardData.childName,
-          childGender: wizardData.childGender,
-          age: wizardData.age,
-          theme: wizardData.theme,
-          subject: wizardData.subject,
-          message: wizardData.message,
-          style: wizardData.style,
-          customNote: wizardData.customNote || ""
-        }
+        checkout: JSON.stringify({
+          custom: {
+            childName: wizardData.childName,
+            childGender: wizardData.childGender,
+            age: wizardData.age,
+            theme: wizardData.theme,
+            subject: wizardData.subject,
+            message: wizardData.message,
+            style: wizardData.style,
+            customNote: wizardData.customNote || ""
+          }
+        })
       });
-    } else {
-      console.error("LemonSqueezy not loaded");
-      toast.error("Payment system not loaded. Please refresh the page and try again.");
+      
+      // Create and click a hidden anchor element to trigger the LemonSqueezy popup
+      const checkoutUrl = `${baseUrl}?${params.toString()}`;
+      const checkoutLink = document.createElement('a');
+      checkoutLink.href = checkoutUrl;
+      checkoutLink.className = 'lemonsqueezy-button';
+      checkoutLink.style.display = 'none';
+      document.body.appendChild(checkoutLink);
+      checkoutLink.click();
+      
+      // Clean up the temporary element
+      setTimeout(() => {
+        document.body.removeChild(checkoutLink);
+      }, 100);
+      
+    } catch (error) {
+      console.error("LemonSqueezy checkout error:", error);
+      toast.error("Error opening checkout. Please try again.");
     }
   };
 
-  // Check if LemonSqueezy is available on mount
   useEffect(() => {
     // Wait for the document to be fully loaded
     const checkLemonSqueezy = () => {

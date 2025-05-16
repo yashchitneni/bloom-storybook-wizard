@@ -7,7 +7,8 @@ interface LemonSqueezyCheckoutOptions {
 }
 
 interface LemonSqueezy {
-  open: (options: LemonSqueezyCheckoutOptions) => void;
+  // The LemonSqueezy global doesn't actually have an open method
+  // It uses links with the class 'lemonsqueezy-button' to trigger checkouts
   initialize?: () => void;
 }
 
