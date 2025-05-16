@@ -47,6 +47,15 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         isSubmitting={isSubmitting}
         isActive={true}
       />
+      
+      {/* LemonSqueezy Buy Button */}
+      <div className="wizard-footer text-center mt-8">
+        <a href="https://dearkidbooks.lemonsqueezy.com/buy/d751df59-d810-4f21-8fd3-f1e6be65a994?embed=1" 
+           className="lemonsqueezy-button inline-block w-full md:w-auto">
+          Buy My Story — $7.99
+        </a>
+        <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
+      </div>
     </motion.section>
   );
 };

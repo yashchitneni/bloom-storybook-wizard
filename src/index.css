@@ -111,6 +111,28 @@
     background-color: rgba(255, 215, 0, 0.6);
   }
 
+  /* LemonSqueezy Button Styles */
+  .lemonsqueezy-button {
+    @apply bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-4 px-8 rounded-full shadow-lg text-lg transition;
+  }
+  
+  .lemonsqueezy-button:hover {
+    @apply bg-yellow-500;
+  }
+  
+  /* Child Profile Form Styles */
+  .child-panel {
+    @apply bg-white rounded-2xl p-6 shadow-lg grid grid-cols-1 md:grid-cols-3 gap-6;
+  }
+  
+  .upload-dashed {
+    @apply relative flex items-center justify-center border-2 border-gray-200 rounded-lg bg-gray-50 h-40 cursor-pointer overflow-hidden;
+  }
+  
+  .upload-dashed input[type="file"] {
+    @apply absolute inset-0 opacity-0 cursor-pointer;
+  }
+
   @keyframes twinkle {
     0%, 100% { opacity: 0.2; transform: scale(0.8); }
     50% { opacity: 1; transform: scale(1); }
