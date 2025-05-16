@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
 import CheckoutCard from '@/components/wizard/CheckoutCard';
 import { WizardData } from '@/types/wizard';
@@ -27,8 +27,49 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   
   const handleSubmit = () => {
     console.log("Submitting wizard with data:", wizardData);
-    // Call onSubmit which will get the latest wizardData through the getter function
     onSubmit();
+  };
+  
+  // Initialize LemonSqueezy script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://assets.lemonsqueezy.com/lemon.js';
+    script.defer = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+  
+  // Create a wrapper for the LemonSqueezy checkout
+  const handleLemonSqueezyCheckout = () => {
+    if (!wizardData.email) {
+      console.error("Email is required for checkout");
+      return;
+    }
+    
+    // Ensure LemonSqueezy is loaded
+    if (window.LemonSqueezy) {
+      console.log("Opening LemonSqueezy checkout with data:", wizardData);
+      window.LemonSqueezy.open({
+        product: "d751df59-d810-4f21-8fd3-f1e6be65a994",
+        embed: true,
+        email: wizardData.email,
+        custom_data: {
+          childName: wizardData.childName,
+          childGender: wizardData.childGender,
+          age: wizardData.age,
+          theme: wizardData.theme,
+          subject: wizardData.subject,
+          message: wizardData.message,
+          style: wizardData.style,
+          customNote: wizardData.customNote || ""
+        }
+      });
+    } else {
+      console.error("LemonSqueezy not loaded");
+    }
   };
   
   return (
@@ -50,11 +91,14 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
       
       {/* LemonSqueezy Buy Button */}
       <div className="wizard-footer text-center mt-8">
-        <a href="https://dearkidbooks.lemonsqueezy.com/buy/d751df59-d810-4f21-8fd3-f1e6be65a994?embed=1" 
-           className="lemonsqueezy-button inline-block w-full md:w-auto">
+        <button 
+          type="button" 
+          className="lemonsqueezy-button inline-block w-full md:w-auto"
+          onClick={handleLemonSqueezyCheckout}
+          disabled={isSubmitting || !wizardData.email}
+        >
           Buy My Story — $7.99
-        </a>
-        <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
+        </button>
       </div>
     </motion.section>
   );
