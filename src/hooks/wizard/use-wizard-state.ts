@@ -8,7 +8,10 @@ import { useWizardLookupData } from "./use-wizard-lookup-data";
 export const useWizardState = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { wizardData, setWizardData, handlePhotoUpload, handleChildPhotoUpload, user } = useWizardData();
-  const { handleAddCharacter, handleUpdateCharacter, handleRemoveCharacter } = useWizardCharacters({ wizardData, setWizardData });
+  const { handleAddCharacter, handleUpdateCharacter, handleRemoveCharacter } = useWizardCharacters({ 
+    wizardData, 
+    updateWizardData: setWizardData 
+  });
   const { currentStep, totalSteps, handleNext, handlePrevious, handleGoToStep } = useWizardNavigation();
   const { themes, subjects, messages, styles, ageCategories, isLoading } = useWizardLookupData();
 
