@@ -39,9 +39,10 @@ serve(async (req) => {
     let event;
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     
-    // If we have a webhook secret, verify the signature
+    // If we have a webhook secret, verify the signature using the synchronous method
     if (webhookSecret) {
       try {
+        // Use synchronous constructEvent instead of asynchronous constructEventAsync
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
         console.log("Webhook signature verified successfully");
       } catch (err) {
@@ -117,7 +118,7 @@ serve(async (req) => {
       
       // Store the order in the database
       try {
-        const { error } = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/orders`, {
+        const { error } = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -125,12 +126,18 @@ serve(async (req) => {
             "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
           },
           body: JSON.stringify({
-            stripe_session_id: session.id,
             email: session.customer_details?.email || session.customer_email,
-            amount: session.amount_total,
-            currency: session.currency,
-            status: "completed",
-            order_data: payload
+            child_name: wizardData.childName || "",
+            child_gender: wizardData.childGender || "",
+            age_category: wizardData.age || "",
+            theme: wizardData.theme || "",
+            subject: wizardData.subject || "",
+            message: wizardData.message || "",
+            style: wizardData.style || "",
+            custom_note: wizardData.customNote || "",
+            child_photo_url: wizardData.childPhotoUrl || null,
+            status: "payment_received",
+            created_at: new Date().toISOString()
           })
         }).then(res => res.json());
         
