@@ -13,7 +13,7 @@ interface CheckoutSectionProps {
 }
 
 // Initialize Stripe with the publishable key
-const stripePromise = loadStripe(process.env.VITE_STRIPE_PUBLISHABLE_KEY || "pk_test_your_fallback_key");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "pk_test_your_fallback_key");
 
 const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   onSubmit,
