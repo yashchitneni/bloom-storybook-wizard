@@ -25,8 +25,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- LemonSqueezy Script - Added to head with defer attribute -->
-    <script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
+    <!-- LemonSqueezy Script - Added to head with defer attribute and onload callback -->
+    <script src="https://assets.lemonsqueezy.com/lemon.js" defer onload="if(typeof createLemonSqueezy === 'function') createLemonSqueezy()"></script>
   </head>
 
   <body>

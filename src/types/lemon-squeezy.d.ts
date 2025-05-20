@@ -8,11 +8,13 @@ interface LemonSqueezyCheckoutOptions {
 }
 
 interface LemonSqueezy {
-  initialize?: () => void;
+  // Make initialize method available
+  initialize: () => void;
   // Open checkout modal
   open: (options: LemonSqueezyCheckoutOptions) => void;
 }
 
 interface Window {
   LemonSqueezy: LemonSqueezy;
+  createLemonSqueezy?: () => void;
 }
