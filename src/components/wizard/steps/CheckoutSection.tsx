@@ -64,17 +64,23 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
       }
       
       if (data?.url) {
-        console.log("Opening Stripe checkout URL:", data.url);
+        console.log("Redirecting to Stripe checkout URL:", data.url);
         
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
+        // Redirect to Stripe Checkout in top level window to avoid iframe issues
+        window.top.location.href = data.url;
       } else {
         console.error("No checkout URL received from Stripe");
         toast.error("Error creating checkout session");
       }
     } catch (error) {
       console.error("Stripe checkout error:", error);
-      toast.error("Error processing checkout. Please try again.");
+      
+      // Check if error might be due to ad blocker or network issues
+      if (error instanceof Error && error.message.includes("net::ERR_BLOCKED_BY_CLIENT")) {
+        toast.error("It seems your ad blocker is preventing Stripe from loading. Please disable it and try again.");
+      } else {
+        toast.error("Error processing checkout. Please try again.");
+      }
     }
   };
 
