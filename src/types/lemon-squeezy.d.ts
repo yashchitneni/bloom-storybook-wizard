@@ -1,15 +1,16 @@
 
 interface LemonSqueezyCheckoutOptions {
-  product: string;
+  variant?: string;
+  product?: string;
   embed?: boolean;
   email?: string;
-  custom_data?: Record<string, string>;
+  custom?: Record<string, any>;
 }
 
 interface LemonSqueezy {
-  // The LemonSqueezy global doesn't actually have an open method
-  // It uses links with the class 'lemonsqueezy-button' to trigger checkouts
   initialize?: () => void;
+  // Open checkout modal
+  open: (options: LemonSqueezyCheckoutOptions) => void;
 }
 
 interface Window {

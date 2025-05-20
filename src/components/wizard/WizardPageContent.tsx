@@ -1,5 +1,5 @@
+
 import React, { useEffect } from 'react';
-import { useWizardState } from '@/hooks/wizard/use-wizard-state';
 import AgeSelectionSection from '@/components/wizard/steps/AgeSelectionSection';
 import ThemeSelectionSection from '@/components/wizard/steps/ThemeSelectionSection';
 import SubjectSelectionSection from '@/components/wizard/steps/SubjectSelectionSection';
@@ -12,6 +12,10 @@ import PreviewSection from '@/components/wizard/steps/PreviewSection';
 import CheckoutSection from '@/components/wizard/steps/CheckoutSection';
 import ContinueButton from '@/components/wizard/steps/ContinueButton';
 import WizardRoadmap from "@/components/WizardRoadmap";
+import { useWizardContext } from '@/contexts/WizardContext';
+import { useWizardLookupData } from '@/hooks/wizard/use-wizard-lookup-data';
+import { useWizardNavigation } from '@/hooks/wizard/use-wizard-navigation';
+import { useWizardCharacters } from '@/hooks/wizard/use-wizard-characters';
 
 interface WizardPageContentProps {
   isLoading: boolean;
@@ -19,69 +23,79 @@ interface WizardPageContentProps {
 }
 
 const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handleSubmit }) => {
-  const {
-    currentStep,
-    wizardData,
-    setWizardData,
-    isSubmitting,
-    handlePhotoUpload,
-    handleChildPhotoUpload,
+  const { state: wizardData, dispatch, isSubmitting } = useWizardContext();
+  const { currentStep, totalSteps, handleGoToStep } = useWizardNavigation();
+  const { themes, subjects, messages, styles, ageCategories } = useWizardLookupData();
+  
+  // Reuse the existing character management hooks with our new context
+  const { 
     handleAddCharacter,
-    handleUpdateCharacter,
-    handleRemoveCharacter,
-    themes,
-    subjects,
-    messages,
-    styles,
-    ageCategories,
-    handleGoToStep,
-    totalSteps
-  } = useWizardState();
+    handleUpdateCharacter, 
+    handleRemoveCharacter 
+  } = useWizardCharacters({ 
+    wizardData, 
+    updateWizardData: (newData) => {
+      if (newData.characters !== wizardData.characters) {
+        dispatch({ type: 'UPDATE_FIELD', field: 'characters', value: newData.characters });
+      }
+    } 
+  });
   
   // Handlers for each step
   const handleSelectAge = (age: string) => {
     console.log("Setting age in wizardData:", age);
-    setWizardData({ ...wizardData, age });
+    dispatch({ type: 'UPDATE_FIELD', field: 'age', value: age });
   };
 
   const handleSelectTheme = (theme: string) => {
     console.log("Setting theme in wizardData:", theme);
-    setWizardData({ ...wizardData, theme, subject: "" }); // Reset subject when theme changes
+    dispatch({ type: 'UPDATE_FIELD', field: 'theme', value: theme });
+    dispatch({ type: 'UPDATE_FIELD', field: 'subject', value: '' }); // Reset subject when theme changes
   };
 
   const handleSelectSubject = (subject: string) => {
     console.log("Setting subject in wizardData:", subject);
-    setWizardData({ ...wizardData, subject });
+    dispatch({ type: 'UPDATE_FIELD', field: 'subject', value: subject });
   };
 
   const handleSelectMessage = (message: string) => {
     console.log("Setting message in wizardData:", message);
-    setWizardData({ ...wizardData, message });
+    dispatch({ type: 'UPDATE_FIELD', field: 'message', value: message });
   };
 
   const handleCustomNoteChange = (customNote: string) => {
     console.log("Setting customNote in wizardData:", customNote);
-    setWizardData({ ...wizardData, customNote });
+    dispatch({ type: 'UPDATE_FIELD', field: 'customNote', value: customNote });
   };
 
   const handleSelectStyle = (style: string) => {
     console.log("Setting style in wizardData:", style);
-    setWizardData({ ...wizardData, style });
+    dispatch({ type: 'UPDATE_FIELD', field: 'style', value: style });
   };
   
   const handleChildNameChange = (childName: string) => {
     console.log("Setting childName in wizardData:", childName);
-    setWizardData({ ...wizardData, childName });
+    dispatch({ type: 'UPDATE_FIELD', field: 'childName', value: childName });
   };
   
   const handleChildGenderChange = (childGender: string) => {
     console.log("Setting childGender in wizardData:", childGender);
-    setWizardData({ ...wizardData, childGender });
+    dispatch({ type: 'UPDATE_FIELD', field: 'childGender', value: childGender });
   };
 
-  const handleEmailChange = (email: string) => {
-    console.log("Setting email in wizardData:", email);
-    setWizardData({ ...wizardData, email });
+  const handleChildPhotoUpload = (file: File) => {
+    if (file.size === 0) {
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: file });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: e.target?.result });
+    };
+    reader.readAsDataURL(file);
   };
 
   // Get available subjects for selected theme
@@ -135,18 +149,6 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
       </div>
     );
   }
-
-  // Debug log the overall state of wizardData
-  console.log("WizardPageContent rendering with data:", {
-    age: wizardData.age,
-    theme: wizardData.theme,
-    subject: wizardData.subject,
-    message: wizardData.message,
-    style: wizardData.style,
-    email: wizardData.email,
-    childName: wizardData.childName,
-    childGender: wizardData.childGender
-  });
 
   return (
     <div className="bg-cream rounded-xl p-6 md:p-10 shadow-sm" id="wizard-container">
@@ -202,7 +204,7 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
         {wizardData.message && (
           <CustomNoteSection
             onCustomNoteChange={handleCustomNoteChange}
-            customNote={wizardData.customNote}
+            customNote={wizardData.customNote || ""}
             isActive={true}
           />
         )}
@@ -253,10 +255,7 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
         {/* Checkout - Show if preview is completed */}
         {wizardData.style && isChildProfileComplete && (
           <CheckoutSection
-            wizardData={wizardData}
-            onEmailChange={handleEmailChange}
             onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
             isActive={true}
           />
         )}

@@ -2,73 +2,92 @@
 import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
 import CheckoutCard from '@/components/wizard/CheckoutCard';
-import { WizardData } from '@/types/wizard';
 import { toast } from 'sonner';
+import { useWizardContext } from '@/contexts/WizardContext';
 
 interface CheckoutSectionProps {
-  wizardData: WizardData;
-  onEmailChange: (email: string) => void;
   onSubmit: () => void;
-  isSubmitting: boolean;
   isActive: boolean;
 }
 
 const CheckoutSection: React.FC<CheckoutSectionProps> = ({
-  wizardData,
-  onEmailChange,
   onSubmit,
-  isSubmitting,
   isActive
 }) => {
-  // Create wrapped handlers to add logging
+  const { state: wizardData, dispatch, isSubmitting } = useWizardContext();
+  
+  // Handle email changes
   const handleEmailChange = (email: string) => {
     console.log("Email changed:", email);
-    onEmailChange(email);
+    dispatch({ type: 'UPDATE_FIELD', field: 'email', value: email });
   };
   
-  // Create a wrapper for the LemonSqueezy checkout
+  // Handle LemonSqueezy checkout
   const handleLemonSqueezyCheckout = () => {
     if (!wizardData.email) {
       toast.error("Email is required for checkout");
       return;
     }
-
+    
     try {
       console.log("Opening LemonSqueezy checkout with data:", wizardData);
       
-      // Create a standard LemonSqueezy checkout URL with query parameters
-      const baseUrl = "https://dearkidbooks.lemonsqueezy.com/buy/d751df59-d810-4f21-8fd3-f1e6be65a994";
-      const params = new URLSearchParams({
-        embed: "1",
-        email: wizardData.email,
-        checkout: JSON.stringify({
-          custom: {
-            childName: wizardData.childName,
-            childGender: wizardData.childGender,
-            age: wizardData.age,
-            theme: wizardData.theme,
-            subject: wizardData.subject,
-            message: wizardData.message,
-            style: wizardData.style,
-            customNote: wizardData.customNote || ""
-          }
-        })
-      });
-      
-      // Create and click a hidden anchor element to trigger the LemonSqueezy popup
-      const checkoutUrl = `${baseUrl}?${params.toString()}`;
-      const checkoutLink = document.createElement('a');
-      checkoutLink.href = checkoutUrl;
-      checkoutLink.className = 'lemonsqueezy-button';
-      checkoutLink.style.display = 'none';
-      document.body.appendChild(checkoutLink);
-      checkoutLink.click();
-      
-      // Clean up the temporary element
-      setTimeout(() => {
-        document.body.removeChild(checkoutLink);
-      }, 100);
-      
+      // Check if LemonSqueezy is available
+      if (window.LemonSqueezy) {
+        // Extract only the data we want to send (no file objects)
+        const customData = {
+          childName: wizardData.childName,
+          childGender: wizardData.childGender,
+          age: wizardData.age,
+          theme: wizardData.theme,
+          subject: wizardData.subject,
+          message: wizardData.message,
+          style: wizardData.style,
+          customNote: wizardData.customNote || ""
+        };
+        
+        // Use the open method
+        window.LemonSqueezy.open({
+          variant: "d751df59-d810-4f21-8fd3-f1e6be65a994",
+          embed: true,
+          email: wizardData.email,
+          custom: customData
+        });
+      } else {
+        console.error("LemonSqueezy not available");
+        toast.error("Checkout system not initialized. Please refresh and try again.");
+        
+        // Fallback to old method if LemonSqueezy.open is not available
+        const baseUrl = "https://dearkidbooks.lemonsqueezy.com/buy/d751df59-d810-4f21-8fd3-f1e6be65a994";
+        const params = new URLSearchParams({
+          embed: "1",
+          email: wizardData.email,
+          checkout: JSON.stringify({
+            custom: {
+              childName: wizardData.childName,
+              childGender: wizardData.childGender,
+              age: wizardData.age,
+              theme: wizardData.theme,
+              subject: wizardData.subject,
+              message: wizardData.message,
+              style: wizardData.style,
+              customNote: wizardData.customNote || ""
+            }
+          })
+        });
+        
+        const checkoutUrl = `${baseUrl}?${params.toString()}`;
+        const checkoutLink = document.createElement('a');
+        checkoutLink.href = checkoutUrl;
+        checkoutLink.className = 'lemonsqueezy-button';
+        checkoutLink.style.display = 'none';
+        document.body.appendChild(checkoutLink);
+        checkoutLink.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(checkoutLink);
+        }, 100);
+      }
     } catch (error) {
       console.error("LemonSqueezy checkout error:", error);
       toast.error("Error opening checkout. Please try again.");
@@ -76,7 +95,7 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   };
 
   useEffect(() => {
-    // Wait for the document to be fully loaded
+    // Check LemonSqueezy initialization status
     const checkLemonSqueezy = () => {
       if (window.LemonSqueezy) {
         console.log("LemonSqueezy initialized successfully");
@@ -120,11 +139,11 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         isActive={true} 
       />
       
-      {/* LemonSqueezy Buy Button - This is the only button we're keeping */}
+      {/* LemonSqueezy Buy Button */}
       <div className="wizard-footer text-center mt-8">
         <button 
           type="button" 
-          className="lemonsqueezy-button inline-block w-full md:w-auto"
+          className="inline-block w-full md:w-auto bg-persimmon hover:bg-persimmon/90 text-white font-medium py-3 px-6 rounded-lg transition-all"
           onClick={handleLemonSqueezyCheckout}
           disabled={isSubmitting || !wizardData.email}
         >

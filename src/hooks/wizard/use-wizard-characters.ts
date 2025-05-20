@@ -1,13 +1,14 @@
 
-import { WizardData, Character } from "@/types/wizard";
 import { v4 as uuidv4 } from 'uuid';
+import { Character, WizardData } from '@/types/wizard';
+import { useWizardContext } from '@/contexts/WizardContext';
 
-export interface UseWizardCharactersProps {
+interface UseWizardCharactersProps {
   wizardData: WizardData;
-  setWizardData: React.Dispatch<React.SetStateAction<WizardData>>;
+  updateWizardData: (data: WizardData) => void;
 }
 
-export const useWizardCharacters = ({ wizardData, setWizardData }: UseWizardCharactersProps) => {
+export const useWizardCharacters = ({ wizardData, updateWizardData }: UseWizardCharactersProps) => {
   const handleAddCharacter = () => {
     const newCharacter: Character = {
       id: uuidv4(),
@@ -18,7 +19,7 @@ export const useWizardCharacters = ({ wizardData, setWizardData }: UseWizardChar
       photoPreview: null
     };
     
-    setWizardData({
+    updateWizardData({
       ...wizardData,
       characters: [...wizardData.characters, newCharacter]
     });
@@ -31,12 +32,14 @@ export const useWizardCharacters = ({ wizardData, setWizardData }: UseWizardChar
           // Handle photo file upload
           const reader = new FileReader();
           reader.onload = (e) => {
-            setWizardData(prev => ({
-              ...prev,
-              characters: prev.characters.map(c => 
-                c.id === id ? {...c, photoPreview: e.target?.result as string} : c
-              )
-            }));
+            const charactersWithUpdatedPhoto = wizardData.characters.map(c => 
+              c.id === id ? {...c, photoPreview: e.target?.result as string} : c
+            );
+            
+            updateWizardData({
+              ...wizardData,
+              characters: charactersWithUpdatedPhoto
+            });
           };
           reader.readAsDataURL(value);
           
@@ -47,14 +50,14 @@ export const useWizardCharacters = ({ wizardData, setWizardData }: UseWizardChar
       return character;
     });
     
-    setWizardData({
+    updateWizardData({
       ...wizardData,
       characters: updatedCharacters
     });
   };
   
   const handleRemoveCharacter = (id: string) => {
-    setWizardData({
+    updateWizardData({
       ...wizardData,
       characters: wizardData.characters.filter(character => character.id !== id)
     });

@@ -2,28 +2,27 @@
 import React from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useWizardState } from '@/hooks/wizard/use-wizard-state';
-import { useWizardSubmission } from '@/hooks/use-wizard-submission';
 import WizardHeader from '@/components/wizard/WizardHeader';
 import WizardPageContent from '@/components/wizard/WizardPageContent';
+import { useWizardContext } from '@/contexts/WizardContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useWizardLookupData } from '@/hooks/wizard/use-wizard-lookup-data';
+import { useWizardNavigation } from '@/hooks/wizard/use-wizard-navigation';
 
 const WizardPage = () => {
-  const {
-    wizardData,
-    setWizardData,
-    isSubmitting,
-    setIsSubmitting,
-    user,
-    isLoading
-  } = useWizardState();
+  const { state: wizardData, isSubmitting, setIsSubmitting } = useWizardContext();
+  const { user } = useAuth();
+  const { isLoading } = useWizardLookupData();
+  const { currentStep, totalSteps, handleNext, handlePrevious, handleGoToStep } = useWizardNavigation();
   
-  // Pass a function to get the latest wizardData state
-  const { handleSubmit } = useWizardSubmission(
-    () => wizardData,
-    setWizardData,
-    setIsSubmitting,
-    user
-  );
+  const handleSubmit = () => {
+    console.log('Submitting wizard data:', wizardData);
+    setIsSubmitting(true);
+    // Future submission logic will go here
+    setTimeout(() => {
+      setIsSubmitting(false);
+    }, 1000);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-cream">
