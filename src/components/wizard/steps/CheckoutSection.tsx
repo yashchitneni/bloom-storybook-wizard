@@ -1,14 +1,19 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion } from "framer-motion";
 import CheckoutCard from '@/components/wizard/CheckoutCard';
 import { toast } from 'sonner';
 import { useWizardContext } from '@/contexts/WizardContext';
+import { supabase } from '@/integrations/supabase/client';
+import { loadStripe } from '@stripe/stripe-js';
 
 interface CheckoutSectionProps {
   onSubmit: () => void;
   isActive: boolean;
 }
+
+// Initialize Stripe with the publishable key
+const stripePromise = loadStripe(process.env.VITE_STRIPE_PUBLISHABLE_KEY || "pk_test_your_fallback_key");
 
 const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   onSubmit,
@@ -22,137 +27,54 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
     dispatch({ type: 'UPDATE_FIELD', field: 'email', value: email });
   };
   
-  // Initialize LemonSqueezy when component mounts
-  useEffect(() => {
-    const initializeLemonSqueezy = () => {
-      if (window.LemonSqueezy && typeof window.LemonSqueezy.initialize === 'function') {
-        try {
-          window.LemonSqueezy.initialize();
-          console.log("LemonSqueezy initialized successfully");
-        } catch (error) {
-          console.error("Error initializing LemonSqueezy:", error);
-        }
-      } else {
-        console.log("LemonSqueezy not fully loaded yet, will try again later");
-      }
-    };
-
-    // Try to initialize immediately if already loaded
-    initializeLemonSqueezy();
-
-    // Also set up a callback for when script loads
-    if (typeof window.createLemonSqueezy === 'undefined') {
-      window.createLemonSqueezy = () => {
-        console.log("LemonSqueezy script has loaded");
-        initializeLemonSqueezy();
-      };
-    }
-
-    // Set up a fallback to check periodically
-    const checkInterval = setInterval(() => {
-      if (window.LemonSqueezy && typeof window.LemonSqueezy.initialize === 'function') {
-        initializeLemonSqueezy();
-        clearInterval(checkInterval);
-      }
-    }, 1000);
-
-    // Clean up interval on unmount
-    return () => clearInterval(checkInterval);
-  }, []);
-  
-  // Handle LemonSqueezy checkout
-  const handleLemonSqueezyCheckout = () => {
+  // Handle Stripe checkout
+  const handleStripeCheckout = async () => {
     if (!wizardData.email) {
       toast.error("Email is required for checkout");
       return;
     }
     
     try {
-      console.log("Opening LemonSqueezy checkout with data:", wizardData);
+      console.log("Creating Stripe checkout session with data:", wizardData);
       
-      // Check if LemonSqueezy is available and properly initialized
-      if (window.LemonSqueezy && typeof window.LemonSqueezy.open === 'function') {
-        // Extract only the data we want to send (no file objects)
-        const customData = {
-          childName: wizardData.childName,
-          childGender: wizardData.childGender,
-          age: wizardData.age,
-          theme: wizardData.theme,
-          subject: wizardData.subject,
-          message: wizardData.message,
-          style: wizardData.style,
-          customNote: wizardData.customNote || ""
-        };
-        
-        // Open the checkout
-        window.LemonSqueezy.open({
-          variant: "d751df59-d810-4f21-8fd3-f1e6be65a994",
-          embed: true,
+      // Extract only the data we want to send (no file objects)
+      const customData = {
+        childName: wizardData.childName,
+        childGender: wizardData.childGender,
+        age: wizardData.age,
+        theme: wizardData.theme,
+        subject: wizardData.subject,
+        message: wizardData.message,
+        style: wizardData.style,
+        customNote: wizardData.customNote || ""
+      };
+      
+      // Call the Supabase Edge Function to create a checkout session
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+        body: {
           email: wizardData.email,
-          custom: customData
-        });
-      } else {
-        console.error("LemonSqueezy not properly initialized");
-        toast.error("Checkout system not ready. Please try again in a moment.");
-        
-        // Try to initialize LemonSqueezy again
-        if (window.LemonSqueezy && typeof window.LemonSqueezy.initialize === 'function') {
-          window.LemonSqueezy.initialize();
+          customData: customData
         }
-        
-        // Fall back to traditional checkout method
-        handleTraditionalCheckout();
-      }
-    } catch (error) {
-      console.error("LemonSqueezy checkout error:", error);
-      toast.error("Error opening checkout. Please try again.");
-      
-      // Fall back to traditional checkout as a last resort
-      handleTraditionalCheckout();
-    }
-  };
-  
-  // Fallback traditional checkout method
-  const handleTraditionalCheckout = () => {
-    try {
-      const baseUrl = "https://dearkidbooks.lemonsqueezy.com/buy/d751df59-d810-4f21-8fd3-f1e6be65a994";
-      const params = new URLSearchParams({
-        embed: "1",
-        email: wizardData.email,
-        checkout: JSON.stringify({
-          custom: {
-            childName: wizardData.childName,
-            childGender: wizardData.childGender,
-            age: wizardData.age,
-            theme: wizardData.theme,
-            subject: wizardData.subject,
-            message: wizardData.message,
-            style: wizardData.style,
-            customNote: wizardData.customNote || ""
-          }
-        })
       });
       
-      const checkoutUrl = `${baseUrl}?${params.toString()}`;
+      if (error) {
+        console.error("Stripe checkout error:", error);
+        toast.error("Error creating checkout: " + error.message);
+        return;
+      }
       
-      // Create a temporary link and simulate click
-      const checkoutLink = document.createElement('a');
-      checkoutLink.href = checkoutUrl;
-      checkoutLink.className = 'lemonsqueezy-button';
-      checkoutLink.target = '_blank';
-      checkoutLink.rel = 'noopener noreferrer';
-      checkoutLink.style.display = 'none';
-      document.body.appendChild(checkoutLink);
-      checkoutLink.click();
-      
-      setTimeout(() => {
-        document.body.removeChild(checkoutLink);
-      }, 100);
-      
-      console.log("Opened traditional checkout URL:", checkoutUrl);
-    } catch (fallbackError) {
-      console.error("Even traditional checkout failed:", fallbackError);
-      toast.error("We're experiencing technical difficulties. Please try again later.");
+      if (data?.url) {
+        console.log("Opening Stripe checkout URL:", data.url);
+        
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        console.error("No checkout URL received from Stripe");
+        toast.error("Error creating checkout session");
+      }
+    } catch (error) {
+      console.error("Stripe checkout error:", error);
+      toast.error("Error processing checkout. Please try again.");
     }
   };
 
@@ -182,12 +104,12 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         isActive={true} 
       />
       
-      {/* LemonSqueezy Buy Button */}
+      {/* Stripe Checkout Button */}
       <div className="wizard-footer text-center mt-8">
         <button 
           type="button" 
           className="inline-block w-full md:w-auto bg-persimmon hover:bg-persimmon/90 text-white font-medium py-3 px-6 rounded-lg transition-all"
-          onClick={handleLemonSqueezyCheckout}
+          onClick={handleStripeCheckout}
           disabled={isSubmitting || !wizardData.email}
         >
           Create My Story — $7.99
