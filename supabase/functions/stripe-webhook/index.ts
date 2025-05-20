@@ -43,6 +43,7 @@ serve(async (req) => {
     if (webhookSecret) {
       try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+        console.log("Webhook signature verified successfully");
       } catch (err) {
         console.error(`Webhook signature verification failed: ${err.message}`);
         return new Response(`Webhook signature verification failed: ${err.message}`, { 
@@ -95,7 +96,8 @@ serve(async (req) => {
       
       // Forward to n8n webhook
       try {
-        const response = await fetch("https://n8n.example.com/webhook/story-generate", {
+        // Update the URL to your actual n8n webhook URL
+        const response = await fetch("https://n8n.dearkidbooks.com/webhook/story-generate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -111,6 +113,34 @@ serve(async (req) => {
       } catch (error) {
         console.error(`Error forwarding to n8n: ${error.message}`);
         // Continue processing even if n8n call fails
+      }
+      
+      // Store the order in the database
+      try {
+        const { error } = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/orders`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+            "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
+          },
+          body: JSON.stringify({
+            stripe_session_id: session.id,
+            email: session.customer_details?.email || session.customer_email,
+            amount: session.amount_total,
+            currency: session.currency,
+            status: "completed",
+            order_data: payload
+          })
+        }).then(res => res.json());
+        
+        if (error) {
+          console.error("Error storing order in database:", error);
+        } else {
+          console.log("Successfully stored order in database");
+        }
+      } catch (err) {
+        console.error("Error storing order in database:", err.message);
       }
     }
     

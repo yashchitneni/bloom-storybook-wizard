@@ -1,46 +1,34 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { WizardProvider } from "@/contexts/WizardContext";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
-import WizardPage from "./pages/WizardPage";
-import AccountPage from "./pages/AccountPage";
-import StoryDetailPage from "./pages/StoryDetailPage";
-import ExamplePage from "./pages/ExamplePage";
-import SignupPage from "./pages/SignupPage";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Index from './pages/Index';
+import WizardPage from './pages/WizardPage';
+import AccountPage from './pages/AccountPage';
+import SignupPage from './pages/SignupPage';
+import StoryDetailPage from './pages/StoryDetailPage';
+import Auth from './pages/Auth';
+import NotFound from './pages/NotFound';
+import SuccessPage from './pages/SuccessPage';
+import { WizardProvider } from './contexts/WizardContext';
+import { Toaster } from 'sonner';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+function App() {
+  return (
+    <Router>
       <WizardProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/wizard" element={<WizardPage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="/story/:id" element={<StoryDetailPage />} />
-              <Route path="/example" element={<ExamplePage />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/wizard" element={<WizardPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/story/:id" element={<StoryDetailPage />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster position="top-right" />
       </WizardProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+    </Router>
+  );
+}
 
 export default App;
