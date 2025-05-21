@@ -4,7 +4,8 @@
 // This enables autocomplete, go to definition, etc.
 
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@12.8.0?target=deno";
+import Stripe from "https://esm.sh/stripe@14.2.0?target=deno";
+import { createHmac } from "https://deno.land/std@0.131.0/node/crypto.ts";
 
 console.log("Stripe webhook handler started");
 
@@ -13,6 +14,46 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Manual webhook signature verification function
+async function verifyStripeSignature(payload: string, signature: string, secret: string): Promise<boolean> {
+  try {
+    console.log("Manually verifying webhook signature...");
+    
+    // Extract timestamp and signatures from the signature header
+    const signatureParts = signature.split(",");
+    if (signatureParts.length < 2) {
+      throw new Error("Invalid signature format");
+    }
+    
+    // Extract timestamp (t=) and signature (v1=)
+    const timestampHeader = signatureParts[0].trim();
+    const signatureHeader = signatureParts[1].trim();
+    
+    if (!timestampHeader.startsWith("t=") || !signatureHeader.startsWith("v1=")) {
+      throw new Error("Invalid signature format: missing t= or v1=");
+    }
+    
+    const timestamp = timestampHeader.substring(2);
+    const signatureValue = signatureHeader.substring(3);
+    
+    // Create the signed payload string that Stripe expects
+    const signedPayload = `${timestamp}.${payload}`;
+    
+    // Create HMAC using webhook secret
+    const hmac = createHmac("sha256", secret);
+    hmac.update(signedPayload);
+    const expectedSignature = hmac.digest("hex");
+    
+    // Compare expected signature with the one from header
+    const isValid = expectedSignature === signatureValue;
+    console.log(`Signature verification ${isValid ? "succeeded" : "failed"}`);
+    return isValid;
+  } catch (error) {
+    console.error(`Error during signature verification: ${error.message}`);
+    return false;
+  }
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -35,19 +76,27 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
     
-    // Verify webhook signature using the webhook secret
+    // Verify webhook signature manually
     let event;
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     
-    // If we have a webhook secret, verify the signature using the synchronous method
     if (webhookSecret) {
-      try {
-        // Use synchronous constructEvent instead of asynchronous constructEventAsync
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-        console.log("Webhook signature verified successfully");
-      } catch (err) {
-        console.error(`Webhook signature verification failed: ${err.message}`);
-        return new Response(`Webhook signature verification failed: ${err.message}`, { 
+      const isValid = await verifyStripeSignature(body, signature, webhookSecret);
+      if (isValid) {
+        // Parse the event JSON directly since we've verified the signature
+        try {
+          event = JSON.parse(body);
+          console.log("Webhook signature verified successfully");
+        } catch (err) {
+          console.error(`Failed to parse event JSON: ${err.message}`);
+          return new Response(`Failed to parse event JSON: ${err.message}`, { 
+            status: 400,
+            headers: corsHeaders
+          });
+        }
+      } else {
+        console.error("Webhook signature verification failed");
+        return new Response("Webhook signature verification failed", { 
           status: 400,
           headers: corsHeaders
         });
