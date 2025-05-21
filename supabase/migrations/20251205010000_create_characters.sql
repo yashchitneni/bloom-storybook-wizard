@@ -1,4 +1,3 @@
-
 -- Create the storage bucket for uploads if it doesn't exist
 INSERT INTO storage.buckets (id, name, public)
 SELECT 'uploads', 'uploads', true
@@ -6,10 +5,18 @@ WHERE NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'uploads');
 
 -- Add storage policies for uploads bucket
 CREATE POLICY "Allow authenticated users to upload files"
-ON storage.objects FOR INSERT TO authenticated USING (bucket_id = 'uploads');
+ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'uploads');
 
 CREATE POLICY "Allow public access to uploaded files"
 ON storage.objects FOR SELECT USING (bucket_id = 'uploads');
+
+-- Ensure storybooks table exists before altering
+CREATE TABLE IF NOT EXISTS public.storybooks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  author TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
 
 -- Update storybooks table to include child fields
 ALTER TABLE public.storybooks

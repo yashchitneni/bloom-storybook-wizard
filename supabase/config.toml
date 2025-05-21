@@ -193,15 +193,6 @@ verify_jwt = false
 enabled = false
 port = 54327
 vector_port = 54328
-# Setup BigQuery project for analytics queries
-gcp_project = ""
-gcp_project_service_account = ""
-gcp_region = ""
 
-# Configure one of the supported backends for migrations: "netlify" or "github"
-[migrations]
-enabled = false
-
-# Configure one of the supported backends for migrations: "netlify" or "github"
 [realtime]
 enabled = true

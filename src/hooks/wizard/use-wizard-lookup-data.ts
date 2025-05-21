@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +6,7 @@ export const useWizardLookupData = () => {
   const [themes, setThemes] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<{[theme: string]: string[]}>({});
   const [messages, setMessages] = useState<string[]>([]);
-  const [styles, setStyles] = useState<string[]>(["Retro", "3D", "Picture Book", "Watercolor"]);
+  const [styles, setStyles] = useState<string[]>([]);
   const [ageCategories, setAgeCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -95,6 +94,22 @@ export const useWizardLookupData = () => {
         
         if (ageData) {
           setAgeCategories(ageData.map(a => a.name));
+        }
+
+        // Fetch styles
+        const { data: stylesData, error: stylesError } = await supabase
+          .from('styles')
+          .select('name');
+        if (stylesError) {
+          console.error("Error fetching styles:", stylesError);
+          toast({
+            title: "Error loading styles",
+            description: "Could not load style options. Please try again.",
+            variant: "destructive",
+          });
+        }
+        if (stylesData) {
+          setStyles(stylesData.map(s => s.name));
         }
 
         console.log("Fetched data:", {

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WizardHeader from '@/components/wizard/WizardHeader';
@@ -10,11 +9,19 @@ import { useWizardLookupData } from '@/hooks/wizard/use-wizard-lookup-data';
 import { useWizardNavigation } from '@/hooks/wizard/use-wizard-navigation';
 
 const WizardPage = () => {
-  const { state: wizardData, isSubmitting, setIsSubmitting } = useWizardContext();
+  const { state: wizardData, isSubmitting, setIsSubmitting, dispatch } = useWizardContext();
   const { user } = useAuth();
   const { isLoading } = useWizardLookupData();
   const { currentStep, totalSteps, handleNext, handlePrevious, handleGoToStep } = useWizardNavigation();
   
+  // Automatically clear wizard state if user lands on the wizard's first page and not submitting
+  useEffect(() => {
+    if (!isSubmitting && currentStep === 1) {
+      dispatch({ type: 'RESET_WIZARD' });
+      localStorage.removeItem('wizardData');
+    }
+  }, [isSubmitting, currentStep, dispatch]);
+
   const handleSubmit = () => {
     console.log('Submitting wizard data:', wizardData);
     setIsSubmitting(true);
