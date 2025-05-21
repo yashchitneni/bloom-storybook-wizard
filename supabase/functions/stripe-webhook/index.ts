@@ -55,6 +55,53 @@ async function verifyStripeSignature(payload: string, signature: string, secret:
   }
 }
 
+// Function to check if a session has already been processed
+async function isSessionProcessed(sessionId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks?stripe_session_id=eq.${sessionId}&select=id`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
+      }
+    });
+    
+    const data = await response.json();
+    return Array.isArray(data) && data.length > 0;
+  } catch (err) {
+    console.error(`Error checking if session was processed: ${err.message}`);
+    return false;
+  }
+}
+
+// Synchronous HTTP request implementation
+function syncHttpRequest(url: string, method: string, headers: Record<string, string>, body: string): { status: number, body: string } {
+  try {
+    const req = new XMLHttpRequest();
+    req.open(method, url, false);  // false makes the request synchronous
+    
+    // Set headers
+    Object.entries(headers).forEach(([key, value]) => {
+      req.setRequestHeader(key, value);
+    });
+    
+    // Send request
+    req.send(body);
+    
+    return {
+      status: req.status,
+      body: req.responseText
+    };
+  } catch (error) {
+    console.error(`Synchronous request failed: ${error.message}`);
+    return {
+      status: 500,
+      body: `Error: ${error.message}`
+    };
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -107,11 +154,21 @@ serve(async (req) => {
       console.warn("No webhook secret configured - skipping signature verification");
     }
     
-    console.log(`Received Stripe event: ${event.type}`);
+    console.log(`Received Stripe event: ${event.type} with ID: ${event.id}`);
     
     // Handle the checkout.session.completed event
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
+      
+      // Check if this session has already been processed (idempotency check)
+      const sessionAlreadyProcessed = await isSessionProcessed(session.id);
+      if (sessionAlreadyProcessed) {
+        console.log(`Session ${session.id} has already been processed. Skipping to prevent duplicate orders.`);
+        return new Response(JSON.stringify({ received: true, status: "already_processed" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
       
       // Extract the metadata
       const wizardDataString = session.metadata?.wizard_data || "{}";
@@ -142,30 +199,29 @@ serve(async (req) => {
         }
       };
       
-      console.log("Forwarding data to n8n webhook:", payload);
+      console.log(`Forwarding data to n8n webhook for event ID: ${event.id}`, payload);
       
-      // Forward to n8n webhook
+      // Forward to n8n webhook using synchronous request
       try {
-        // Update the URL to your actual n8n webhook URL
-        const response = await fetch("https://n8n.dearkidbooks.com/webhook/story-generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
+        // Use synchronous XMLHttpRequest instead of fetch
+        const result = syncHttpRequest(
+          "https://n8n.dearkidbooks.com/webhook/story-generate",
+          "POST",
+          { "Content-Type": "application/json" },
+          JSON.stringify(payload)
+        );
         
-        if (!response.ok) {
-          throw new Error(`Failed to forward to n8n: ${response.statusText}`);
+        if (result.status < 200 || result.status >= 300) {
+          throw new Error(`Failed to forward to n8n: HTTP status ${result.status}`);
         }
         
-        console.log("Successfully forwarded to n8n webhook");
+        console.log(`Successfully forwarded to n8n webhook for event ID: ${event.id}`);
       } catch (error) {
-        console.error(`Error forwarding to n8n: ${error.message}`);
+        console.error(`Error forwarding to n8n for event ID: ${event.id}: ${error.message}`);
         // Continue processing even if n8n call fails
       }
       
-      // Store the order in the database
+      // Store the order in the database with stripe_session_id for idempotency
       try {
         const { error } = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks`, {
           method: "POST",
@@ -186,21 +242,22 @@ serve(async (req) => {
             custom_note: wizardData.customNote || "",
             child_photo_url: wizardData.childPhotoUrl || null,
             status: "payment_received",
+            stripe_session_id: session.id, // Store session ID for idempotency
             created_at: new Date().toISOString()
           })
         }).then(res => res.json());
         
         if (error) {
-          console.error("Error storing order in database:", error);
+          console.error(`Error storing order in database for event ID: ${event.id}:`, error);
         } else {
-          console.log("Successfully stored order in database");
+          console.log(`Successfully stored order in database for event ID: ${event.id} and session ID: ${session.id}`);
         }
       } catch (err) {
-        console.error("Error storing order in database:", err.message);
+        console.error(`Error storing order in database for event ID: ${event.id}:`, err.message);
       }
     }
     
-    return new Response(JSON.stringify({ received: true }), {
+    return new Response(JSON.stringify({ received: true, eventId: event.id }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
