@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -51,20 +50,14 @@ export const useWizardSubmission = (
     setError(null);
 
     try {
-      // Upload files if needed
-      let childPhotoUrl = null;
-      if (wizardData.childPhotoFile) {
-        const childPhotoPath = `uploads/children/${wizardData.childName.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
-        const { data: childPhotoData, error: childUploadError } = await supabase.storage
-          .from("images")
-          .upload(childPhotoPath, wizardData.childPhotoFile);
-
-        if (childUploadError) {
-          throw new Error(`Child photo upload failed: ${childUploadError.message}`);
-        }
-
-        childPhotoUrl = childPhotoPath;
-      }
+      // Use the already uploaded photo URLs
+      const childPhotoUrl = wizardData.childPhotoUrl;
+      const mainPhotoUrl = wizardData.photoFile && wizardData.photoFile !== wizardData.childPhotoFile 
+        ? await uploadFile(wizardData.photoFile, { 
+            folder: "user-uploads/storybooks",
+            userId: user?.id 
+          })
+        : childPhotoUrl;
 
       // Insert storybook record with all required fields
       const { data: storybookData, error: storybookError } = await supabase
@@ -80,7 +73,7 @@ export const useWizardSubmission = (
           child_name: wizardData.childName,
           child_gender: wizardData.childGender,
           child_photo_url: childPhotoUrl,
-          photo_url: childPhotoUrl, // Using the same photo for now, adjust if needed
+          photo_url: mainPhotoUrl,
           email: wizardData.email,
           moral: wizardData.moral || null,
           status: "draft", // Default status is draft
@@ -112,7 +105,7 @@ export const useWizardSubmission = (
         let characterPhotoUrl = null;
         
         if (character.photoFile) {
-          const characterPhotoPath = `uploads/characters/${character.name.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
+          const characterPhotoPath = `user-uploads/characters/${character.name.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`;
           const { data: characterUploadData, error: characterUploadError } = await supabase.storage
             .from("images")
             .upload(characterPhotoPath, character.photoFile);

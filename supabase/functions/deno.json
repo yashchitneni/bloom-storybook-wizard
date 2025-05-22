@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window", "dom", "esnext"],
+    "strict": true
+  },
+  "importMap": "./import_map.json",
+  "tasks": {
+    "start": "deno run --allow-net --allow-env index.ts"
+  },
+  "lint": {
+    "files": {
+      "include": ["**/*.ts"]
+    },
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+} 

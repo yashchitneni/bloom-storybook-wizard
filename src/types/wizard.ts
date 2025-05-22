@@ -16,6 +16,7 @@ export interface WizardData {
   childGender: string;
   childPhotoFile: File | null;
   childPhotoPreview: string | null;
+  childPhotoUrl: string | null;
   
   // Additional characters
   characters: Character[];

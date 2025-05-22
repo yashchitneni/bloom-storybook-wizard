@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseAdmin } from "@/integrations/supabase/client";
 
 export const useStorageBucket = (bucketName: string) => {
   const [isReady, setIsReady] = useState(false);
@@ -9,8 +8,8 @@ export const useStorageBucket = (bucketName: string) => {
   useEffect(() => {
     const checkBucket = async () => {
       try {
-        // Check if bucket exists
-        const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+        // Check if bucket exists using admin client
+        const { data: buckets, error: listError } = await supabaseAdmin.storage.listBuckets();
         
         if (listError) {
           throw listError;

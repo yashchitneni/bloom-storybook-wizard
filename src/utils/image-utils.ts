@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -34,13 +33,13 @@ export const getStyleImageFilename = (styleName: string): string => {
 };
 
 /**
- * Gets a public URL for a style image
+ * Gets the URL for a style preview image
  * @param styleName The style name
- * @returns The URL to the style image
+ * @returns The URL to the style preview image
  */
 export const getStyleImageUrl = (styleName: string): string => {
   const filename = getStyleImageFilename(styleName);
-  return getStorageImageUrl(filename);
+  return getStorageImageUrl(filename, 'style-images');
 };
 
 /**

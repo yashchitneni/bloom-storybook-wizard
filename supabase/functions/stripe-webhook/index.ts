@@ -2,8 +2,25 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.2.0?target=deno";
+import { serve } from "std/http/server.ts";
+import Stripe from "stripe";
+
+// Add Deno namespace declaration
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
+
+// Add type declarations for global objects
+declare global {
+  interface Window {
+    console: Console;
+  }
+  const console: Console;
+  const fetch: typeof globalThis.fetch;
+  const Response: typeof globalThis.Response;
+}
 
 console.log("Stripe webhook handler started");
 
@@ -27,13 +44,14 @@ async function isSessionProcessed(sessionId: string): Promise<boolean> {
     
     const data = await response.json();
     return Array.isArray(data) && data.length > 0;
-  } catch (err) {
-    console.error(`Error checking if session was processed: ${err.message}`);
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error(`Error checking if session was processed: ${error.message}`);
     return false;
   }
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -168,11 +186,18 @@ serve(async (req) => {
           },
           body: JSON.stringify(insertPayload)
         });
-        const supabaseData = await supabaseRes.json();
-        console.log("Supabase insert response:", supabaseData);
-        if (supabaseData.error) {
+        const rawText = await supabaseRes.text();
+        console.log("Supabase raw response text:", rawText);
+        let supabaseData;
+        try {
+          supabaseData = JSON.parse(rawText);
+        } catch (e) {
+          console.error("Failed to parse Supabase response as JSON:", e, rawText);
+          supabaseData = null;
+        }
+        if (supabaseData && supabaseData.error) {
           console.error(`Error storing order in database for event ID: ${event.id}:`, supabaseData.error);
-        } else {
+        } else if (supabaseData) {
           console.log(`Successfully stored order in database for event ID: ${event.id} and session ID: ${session.id}`);
         }
       } catch (err) {
