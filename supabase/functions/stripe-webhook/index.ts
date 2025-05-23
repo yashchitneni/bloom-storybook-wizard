@@ -127,26 +127,81 @@ serve(async (req: Request) => {
         wizardData = {};
       }
       
-      // Create payload for n8n webhook with the same structure as before
+      // --- BEGIN FETCH STORYBOOK AND CHARACTERS FROM DATABASE ---
+      let storybookDetailsFromDb = null;
+      let charactersFromDb: any[] = [];
+      let storybookIdFromDb = null;
+
+      try {
+        console.log(`Fetching storybook details for stripe_session_id: ${session.id}`);
+        const storybookResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks?stripe_session_id=eq.${session.id}&select=*,characters(*)`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+            "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
+          }
+        });
+
+        if (!storybookResponse.ok) {
+          throw new Error(`Failed to fetch storybook: ${storybookResponse.status} ${await storybookResponse.text()}`);
+        }
+
+        const storybooksData = await storybookResponse.json();
+        if (storybooksData && storybooksData.length > 0) {
+          storybookDetailsFromDb = storybooksData[0];
+          storybookIdFromDb = storybookDetailsFromDb.id;
+          // Explicitly log what storybookDetailsFromDb.characters contains
+          console.log("Raw characters from DB query:", storybookDetailsFromDb.characters);
+          charactersFromDb = storybookDetailsFromDb.characters || []; 
+          console.log(`Successfully fetched storybook (ID: ${storybookIdFromDb}) and ${charactersFromDb.length} characters from DB.`);
+        } else {
+          console.warn(`No storybook found in DB for stripe_session_id: ${session.id}. Will rely on metadata only if available or fail if critical data is missing.`);
+          // If the storybook record *must* exist at this point, you might want to throw an error here.
+        }
+      } catch (dbError) {
+        console.error(`Error fetching storybook/characters from DB for stripe_session_id ${session.id}:`, dbError.message);
+        // Decide if this is a fatal error. If n8n requires full character data, it might be.
+        // For now, we'll allow it to proceed with potentially incomplete data for n8n.
+      }
+      // --- END FETCH STORYBOOK AND CHARACTERS FROM DATABASE ---
+      
+      // Create payload for n8n webhook
+      // Combine data from metadata (less priority) and DB (more priority)
+      const n8nWizardData = {
+        childName: storybookDetailsFromDb?.child_name || wizardData.childName || "",
+        childGender: storybookDetailsFromDb?.child_gender || wizardData.childGender || "",
+        ageCategory: storybookDetailsFromDb?.age_category || wizardData.age || "", // 'age' from metadata, 'age_category' from DB
+        theme: storybookDetailsFromDb?.theme || wizardData.theme || "",
+        subject: storybookDetailsFromDb?.subject || wizardData.subject || "",
+        message: storybookDetailsFromDb?.message || wizardData.message || "",
+        style: storybookDetailsFromDb?.style || wizardData.style || "",
+        customNote: storybookDetailsFromDb?.custom_note || wizardData.customNote || "",
+        childPhotoUrl: storybookDetailsFromDb?.child_photo_url || wizardData.childPhotoUrl || "",
+        // Add characters from DB to the n8n payload
+        characters: charactersFromDb.map(char => ({
+          id: char.id,
+          name: char.name,
+          relation: char.relation,
+          gender: char.gender,
+          photoUrl: char.photo_url || null // Ensure field name matches what n8n expects
+        })),
+        // Include other DB fields if n8n needs them
+        storybookId: storybookIdFromDb, 
+        moral: storybookDetailsFromDb?.moral || wizardData.moral || "",
+        email: session.customer_details?.email || session.customer_email || storybookDetailsFromDb?.email || "", // Prioritize Stripe email
+      };
+
+
       const payload = {
         order_id: session.id,
         customer: {
           email: session.customer_details?.email || session.customer_email
         },
-        wizard_data: {
-          childName: wizardData.childName || "",
-          childGender: wizardData.childGender || "",
-          ageCategory: wizardData.age || "",
-          theme: wizardData.theme || "",
-          subject: wizardData.subject || "",
-          message: wizardData.message || "",
-          style: wizardData.style || "",
-          customNote: wizardData.customNote || "",
-          childPhotoUrl: wizardData.childPhotoUrl || ""
-        }
+        wizard_data: n8nWizardData // Use the enriched wizard_data
       };
       
-      console.log(`Forwarding data to n8n webhook for event ID: ${event.id}`, payload);
+      console.log(`Forwarding data to n8n webhook for event ID: ${event.id}`, JSON.stringify(payload, null, 2));
       
       // Forward to n8n webhook using async fetch
       try {
@@ -168,48 +223,94 @@ serve(async (req: Request) => {
       }
       
       // Store the order in the database with stripe_session_id for idempotency
-      try {
-        const insertPayload = {
-          email: session.customer_details?.email || session.customer_email || "",
-          child_name: wizardData.childName || "Your Child",
-          child_gender: wizardData.childGender || "",
-          age_category: wizardData.age || "0-2",
-          theme: wizardData.theme || "",
-          subject: wizardData.subject || "",
-          message: wizardData.message || "",
-          style: wizardData.style || "",
-          custom_note: wizardData.customNote || null,
-          child_photo_url: wizardData.childPhotoUrl || null,
-          status: "payment_received",
-          stripe_session_id: session.id
-        };
-        
-        console.log("Attempting to insert into storybooks with payload:", insertPayload);
-        const supabaseRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
-            "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
-          },
-          body: JSON.stringify(insertPayload)
-        });
-        const rawText = await supabaseRes.text();
-        console.log("Supabase raw response text:", rawText);
-        let supabaseData;
+      // This part might be redundant if the storybook is already created/updated before Stripe checkout
+      // or needs to be an UPDATE if the record was created pre-checkout.
+      // For now, assuming it's an INSERT for a new story, or that your pre-checkout logic handles this.
+      // If storybookDetailsFromDb is found, this should ideally be an UPDATE operation
+      // or this block should be conditional.
+      
+      if (!storybookDetailsFromDb) { // Only insert if no record was found via stripe_session_id
         try {
-          supabaseData = JSON.parse(rawText);
-        } catch (e) {
-          console.error("Failed to parse Supabase response as JSON:", e, rawText);
-          supabaseData = null;
+          const insertPayload = {
+            email: session.customer_details?.email || session.customer_email || "",
+            child_name: n8nWizardData.childName || "Your Child",
+            child_gender: n8nWizardData.childGender || "",
+            age_category: n8nWizardData.ageCategory || "0-2",
+            theme: n8nWizardData.theme || "",
+            subject: n8nWizardData.subject || "",
+            message: n8nWizardData.message || "",
+            style: n8nWizardData.style || "",
+            custom_note: n8nWizardData.customNote || null,
+            child_photo_url: n8nWizardData.childPhotoUrl || null,
+            moral: n8nWizardData.moral || null,
+            // status: "payment_received", // Set by your application logic, possibly before this webhook
+            // If the storybook is created *before* checkout, its status might already be set.
+            // If created *by* this webhook, 'payment_received' or 'pending_fulfillment' is appropriate.
+            status: "payment_received", 
+            stripe_session_id: session.id // Critical for linking
+          };
+          
+          console.log("Attempting to insert into storybooks with payload (no existing record found):", insertPayload);
+          const supabaseRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
+            },
+            body: JSON.stringify(insertPayload)
+          });
+          const rawText = await supabaseRes.text();
+          console.log("Supabase raw response text:", rawText);
+          let supabaseData;
+          try {
+            // If rawText is empty (common for successful POST with no return=representation)
+            // and response was OK, consider it a success without data to parse.
+            if (supabaseRes.ok && !rawText.trim()) {
+              console.log("Supabase POST successful with empty response body.");
+              supabaseData = { success: true }; // Indicate success
+            } else {
+              supabaseData = JSON.parse(rawText);
+            }
+          } catch (e) {
+            console.error("Failed to parse Supabase response as JSON:", e, "Raw text:", rawText);
+            supabaseData = null; // Indicate parsing failure
+          }
+          if (supabaseData && supabaseData.error) {
+            console.error(`Error storing order in database for event ID: ${event.id}:`, supabaseData.error);
+          } else if (supabaseData) {
+            console.log(`Successfully stored order in database for event ID: ${event.id} and session ID: ${session.id}`);
+          }
+        } catch (err) {
+          console.error(`Error storing order in database for event ID: ${event.id}:`, err.message);
         }
-        if (supabaseData && supabaseData.error) {
-          console.error(`Error storing order in database for event ID: ${event.id}:`, supabaseData.error);
-        } else if (supabaseData) {
-          console.log(`Successfully stored order in database for event ID: ${event.id} and session ID: ${session.id}`);
+      } else {
+        // If storybookDetailsFromDb exists, the record is already there. 
+        // You might want to update its status here if needed, e.g., from 'pending_payment' to 'payment_received'.
+        console.log(`Storybook record with stripe_session_id ${session.id} already exists. Skipping insert, consider update if status needs change.`);
+        // Example: Update status (uncomment and adjust if needed)
+        /*
+        try {
+          const updateStatusPayload = { status: "payment_received" };
+          console.log(`Attempting to update storybook ${storybookIdFromDb} status to payment_received`);
+          const updateResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks?id=eq.${storybookIdFromDb}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "Prefer": "return=minimal",
+              "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+              "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
+            },
+            body: JSON.stringify(updateStatusPayload)
+          });
+          if (!updateResponse.ok) {
+            throw new Error(`Failed to update storybook status: ${updateResponse.status} ${await updateResponse.text()}`);
+          }
+          console.log(`Successfully updated storybook ${storybookIdFromDb} status.`);
+        } catch (updateErr) {
+          console.error(`Error updating storybook status for ${storybookIdFromDb}:`, updateErr.message);
         }
-      } catch (err) {
-        console.error(`Error storing order in database for event ID: ${event.id}:`, err.message);
+        */
       }
     }
     

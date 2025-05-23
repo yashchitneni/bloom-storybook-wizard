@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { WizardData } from '@/types/wizard';
+import { WizardData, Character } from '@/types/wizard';
 import { toast } from '@/components/ui/use-toast';
 
 // Initial state for the wizard
@@ -25,10 +25,12 @@ const initialWizardState: WizardData = {
 // Action types
 type WizardAction = 
   | { type: 'UPDATE_FIELD'; field: keyof WizardData; value: any }
-  | { type: 'ADD_CHARACTER'; character: any }
+  | { type: 'ADD_CHARACTER'; character: Character }
   | { type: 'UPDATE_CHARACTER'; id: string; field: string; value: any }
   | { type: 'REMOVE_CHARACTER'; id: string }
-  | { type: 'RESET_WIZARD' };
+  | { type: 'RESET_WIZARD' }
+  | { type: 'UPDATE_CHARACTER_PHOTO_URL'; id: string; photoUrl: string | null; photoFile?: File | null; photoPreview?: string | null }
+  | { type: 'UPDATE_CHARACTER_PREVIEW'; id: string; photoPreview: string | null; photoFile: File | null };
 
 // Reducer function
 const wizardReducer = (state: WizardData, action: WizardAction): WizardData => {
@@ -59,6 +61,34 @@ const wizardReducer = (state: WizardData, action: WizardAction): WizardData => {
       };
     case 'RESET_WIZARD':
       return initialWizardState;
+    case 'UPDATE_CHARACTER_PREVIEW':
+      return {
+        ...state,
+        characters: state.characters.map(char =>
+          char.id === action.id
+            ? { ...char, photoPreview: action.photoPreview, photoFile: action.photoFile }
+            : char
+        ),
+      };
+    case 'UPDATE_CHARACTER_PHOTO_URL':
+      return {
+        ...state,
+        characters: state.characters.map(char => {
+          if (char.id === action.id) {
+            const updatedChar = { ...char, photoUrl: action.photoUrl };
+            if (action.photoFile !== undefined) {
+              updatedChar.photoFile = action.photoFile;
+            }
+            if (action.photoUrl === null && action.photoPreview === null) {
+              updatedChar.photoPreview = null;
+            } else if (action.photoPreview !== undefined) {
+              updatedChar.photoPreview = action.photoPreview;
+            }
+            return updatedChar;
+          }
+          return char;
+        }),
+      };
     default:
       return state;
   }

@@ -29,6 +29,7 @@ export interface Character {
   gender: string;
   photoFile: File | null;
   photoPreview: string | null;
+  photoUrl: string | null;
 }
 
 export interface Storybook {
@@ -155,6 +156,8 @@ export interface CharactersCardProps {
   onAddCharacter: () => void;
   onUpdateCharacter: (id: string, field: string, value: any) => void;
   onRemoveCharacter: (id: string) => void;
+  onCharacterPhotoUpload: (characterId: string, file: File | null) => void;
+  isUploadingCharacterPhoto: Record<string, boolean>;
   isActive: boolean;
   maxCharacters?: number;
 }

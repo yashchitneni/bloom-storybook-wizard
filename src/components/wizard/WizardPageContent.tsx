@@ -27,19 +27,20 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
   const { currentStep, totalSteps, handleGoToStep } = useWizardNavigation();
   const { themes, subjects, messages, styles, ageCategories } = useWizardLookupData();
   
-  // Reuse the existing character management hooks with our new context
+  // Character management hooks
   const { 
     handleAddCharacter,
-    handleUpdateCharacter, 
-    handleRemoveCharacter 
+    handleRemoveCharacter,
+    handleCharacterPhotoUpload,
+    isUploadingCharacterPhoto
   } = useWizardCharacters({ 
-    wizardData, 
-    updateWizardData: (newData) => {
-      if (newData.characters !== wizardData.characters) {
-        dispatch({ type: 'UPDATE_FIELD', field: 'characters', value: newData.characters });
-      }
-    } 
+    dispatch
   });
+
+  // Wrapper for handleUpdateCharacter to integrate with dispatch more directly
+  const originalHandleUpdateCharacter = useWizardCharacters({ 
+    dispatch
+  }).handleUpdateCharacter;
   
   // Get the real photo upload handler from our hook
   const { handleChildPhotoUpload, isUploading: isChildPhotoUploading } = useWizardPhotoUpload();
@@ -226,8 +227,10 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
           <CharactersSection
             characters={wizardData.characters}
             onAddCharacter={handleAddCharacter}
-            onUpdateCharacter={handleUpdateCharacter}
+            onUpdateCharacter={originalHandleUpdateCharacter}
             onRemoveCharacter={handleRemoveCharacter}
+            onCharacterPhotoUpload={handleCharacterPhotoUpload}
+            isUploadingCharacterPhoto={isUploadingCharacterPhoto}
             isActive={true}
             maxCharacters={4}
           />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from "framer-motion";
 import CharactersCard from '@/components/wizard/CharactersCard';
@@ -9,6 +8,8 @@ interface CharactersSectionProps {
   onAddCharacter: () => void;
   onUpdateCharacter: (id: string, field: string, value: any) => void;
   onRemoveCharacter: (id: string) => void;
+  onCharacterPhotoUpload: (characterId: string, file: File | null) => void;
+  isUploadingCharacterPhoto: Record<string, boolean>;
   isActive: boolean;
   maxCharacters: number;
 }
@@ -18,6 +19,8 @@ const CharactersSection: React.FC<CharactersSectionProps> = ({
   onAddCharacter,
   onUpdateCharacter,
   onRemoveCharacter,
+  onCharacterPhotoUpload,
+  isUploadingCharacterPhoto,
   isActive,
   maxCharacters
 }) => {
@@ -35,6 +38,8 @@ const CharactersSection: React.FC<CharactersSectionProps> = ({
         onAddCharacter={onAddCharacter}
         onUpdateCharacter={onUpdateCharacter}
         onRemoveCharacter={onRemoveCharacter}
+        onCharacterPhotoUpload={onCharacterPhotoUpload}
+        isUploadingCharacterPhoto={isUploadingCharacterPhoto}
         isActive={true}
         maxCharacters={maxCharacters}
       />
