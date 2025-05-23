@@ -39,25 +39,27 @@ const corsHeaders = {
 };
 
 // Function to check if a session has already been processed
-async function isSessionProcessed(sessionId: string): Promise<boolean> {
-  try {
-    const response = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks?stripe_session_id=eq.${sessionId}&select=id`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
-        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
-      }
-    });
+// Removing isSessionProcessed function as its logic is effectively covered by
+// fetching storybookDetailsFromDb and the conditional insert logic later on.
+// async function isSessionProcessed(sessionId: string): Promise<boolean> {
+//   try {
+//     const response = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/storybooks?stripe_session_id=eq.${sessionId}&select=id`, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         "apikey": Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
+//         "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""}`
+//       }
+//     });
     
-    const data = await response.json();
-    return Array.isArray(data) && data.length > 0;
-  } catch (err: unknown) {
-    const error = err as Error;
-    console.error(`Error checking if session was processed: ${error.message}`);
-    return false;
-  }
-}
+//     const data = await response.json();
+//     return Array.isArray(data) && data.length > 0;
+//   } catch (err: unknown) {
+//     const error = err as Error;
+//     console.error(`Error checking if session was processed: ${error.message}`);
+//     return false;
+//   }
+// }
 
 serve(async (req: Request) => {
   // Handle CORS preflight requests
@@ -107,16 +109,11 @@ serve(async (req: Request) => {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       
-      // Check if this session has already been processed (idempotency check)
-      const sessionAlreadyProcessed = await isSessionProcessed(session.id);
-      if (sessionAlreadyProcessed) {
-        console.log(`Session ${session.id} has already been processed. Skipping to prevent duplicate orders.`);
-        return new Response(JSON.stringify({ received: true, status: "already_processed" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        });
-      }
-      
+      // Removed the early exit based on isSessionProcessed.
+      // The logic to fetch storybookDetailsFromDb and conditionally insert
+      // already handles idempotency for database writes.
+      // The n8n call needs to happen regardless of pre-existing DB record by CheckoutSection.tsx.
+
       // Extract the metadata
       const wizardDataString = session.metadata?.wizard_data || "{}";
       let wizardData;
