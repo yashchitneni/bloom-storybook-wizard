@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/use-toast";
 
@@ -47,7 +47,7 @@ export const uploadFile = async (file: File, options: UploadOptions = {}): Promi
     });
     
     // First check if bucket exists using admin client
-    const { data: buckets, error: bucketError } = await supabaseAdmin.storage.listBuckets();
+    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
     console.log('[uploadFile] Buckets returned by listBuckets:', buckets);
     if (bucketError) {
       console.error("[uploadFile] Error checking buckets:", bucketError);
@@ -140,5 +140,16 @@ export const deleteFile = async (path: string): Promise<boolean> => {
   } catch (error) {
     console.error("[deleteFile] Error:", error);
     return false;
+  }
+};
+
+export const listBuckets = async () => {
+  try {
+    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+    if (bucketError) throw bucketError;
+    return buckets;
+  } catch (error) {
+    console.error('Error listing buckets:', error);
+    throw error;
   }
 };

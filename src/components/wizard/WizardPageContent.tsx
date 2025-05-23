@@ -15,7 +15,6 @@ import { useWizardContext } from '@/contexts/WizardContext';
 import { useWizardLookupData } from '@/hooks/wizard/use-wizard-lookup-data';
 import { useWizardNavigation } from '@/hooks/wizard/use-wizard-navigation';
 import { useWizardCharacters } from '@/hooks/wizard/use-wizard-characters';
-import { useWizardData } from '@/hooks/wizard/use-wizard-data';
 
 interface WizardPageContentProps {
   isLoading: boolean;
@@ -26,7 +25,6 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
   const { state: wizardData, dispatch, isSubmitting } = useWizardContext();
   const { currentStep, totalSteps, handleGoToStep } = useWizardNavigation();
   const { themes, subjects, messages, styles, ageCategories } = useWizardLookupData();
-  const { handleChildPhotoUpload } = useWizardData();
   
   // Reuse the existing character management hooks with our new context
   const { 
@@ -84,11 +82,23 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
     dispatch({ type: 'UPDATE_FIELD', field: 'childGender', value: childGender });
   };
 
+  const handleChildPhotoUpload = (file: File) => {
+    if (file.size === 0) {
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: file });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: e.target?.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleChildPhotoUploadAsync = async (file: File) => {
     console.log('[WizardPageContent] Calling real handleChildPhotoUpload with:', file);
     await handleChildPhotoUpload(file);
-    // Optionally, update context if needed (if you want to sync preview in context)
-    // You can also dispatch here if you want to keep context in sync
   };
 
   // Get available subjects for selected theme

@@ -24,14 +24,24 @@ serve(async (req) => {
     const body = await req.json();
     const { email, customData } = body;
     
+    console.log("[stripe-checkout] Incoming payload:", JSON.stringify(body));
     if (!email) {
+      console.error("[stripe-checkout] Missing email in payload");
       throw new Error("Email is required");
     }
     
-    console.log(`Creating checkout session for email: ${email}`, customData);
+    // Log Stripe secret key presence (not value)
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeSecretKey) {
+      console.error("[stripe-checkout] STRIPE_SECRET_KEY is missing or empty!");
+    } else {
+      console.log("[stripe-checkout] STRIPE_SECRET_KEY is present and loaded.");
+    }
+    
+    console.log(`[stripe-checkout] Creating checkout session for email: ${email}`, customData);
     
     // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripe = new Stripe(stripeSecretKey || "", {
       apiVersion: "2023-10-16",
       httpClient: Stripe.createFetchHttpClient(),
     });
@@ -54,14 +64,14 @@ serve(async (req) => {
       },
     });
     
-    console.log(`Checkout session created: ${session.id}`);
+    console.log(`[stripe-checkout] Checkout session created: ${session.id}`);
     
     return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    console.error(`Error creating checkout session: ${error.message}`);
+    console.error(`[stripe-checkout] Error creating checkout session: ${error.message}`);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,

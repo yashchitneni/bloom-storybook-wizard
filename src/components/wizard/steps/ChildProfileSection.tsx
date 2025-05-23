@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { motion } from "framer-motion";
 import ChildProfileCard from '@/components/wizard/ChildProfileCard';
+import { useWizardPhotoUpload } from '@/hooks/wizard/use-wizard-photo-upload';
 
 interface ChildProfileSectionProps {
   onChildNameChange: (name: string) => void;
@@ -22,6 +22,8 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
   childPhotoPreview,
   isActive
 }) => {
+  const { isUploading } = useWizardPhotoUpload();
+  
   // Create wrapped handlers to add logging
   const handleChildNameChange = (name: string) => {
     console.log("Child name changed:", name);
@@ -55,6 +57,7 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
         childGender={childGender}
         childPhotoPreview={childPhotoPreview}
         isActive={true}
+        isUploading={isUploading}
       />
     </motion.section>
   );

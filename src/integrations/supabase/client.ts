@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SUPABASE_CONFIG } from './config';
 
+console.log('Creating Supabase client with:', SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 

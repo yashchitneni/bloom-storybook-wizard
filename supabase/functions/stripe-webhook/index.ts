@@ -24,6 +24,14 @@ declare global {
 
 console.log("Stripe webhook handler started");
 
+// Log Supabase configuration
+console.log("Supabase Configuration:", {
+  url: Deno.env.get("SUPABASE_URL"),
+  hasServiceRoleKey: !!Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  hasStripeKey: !!Deno.env.get("STRIPE_SECRET_KEY"),
+  hasWebhookSecret: !!Deno.env.get("STRIPE_WEBHOOK_SECRET")
+});
+
 // CORS headers for browser requests
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,7 +86,7 @@ serve(async (req: Request) => {
     
     if (webhookSecret) {
       try {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+        event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
         console.log("Webhook signature verified successfully");
       } catch (err) {
         console.error(`Webhook signature verification failed: ${err.message}`);

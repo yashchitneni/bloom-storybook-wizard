@@ -1,19 +1,19 @@
-import { supabase, supabaseAdmin } from "@/integrations/supabase/client";
-import { uploadFile, getFileUrl, deleteFile } from "./storage-utils";
+import { supabase } from "@/integrations/supabase/client";
+import { uploadFile, getPublicUrl, deleteFile } from "./storage-utils";
 
 describe("Storage Utils", () => {
-  const testBucketName = "images";
+  const testBucketName = "test-bucket";
   const testFileName = "test.txt";
   const testFileContent = "Hello, World!";
   let uploadedFilePath: string | null = null;
 
   beforeAll(async () => {
-    // Ensure bucket exists
-    const { data: buckets } = await supabaseAdmin.storage.listBuckets();
-    const bucketExists = buckets.some(b => b.name === testBucketName);
-    
+    // Check if bucket exists
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some(b => b.name === testBucketName);
+
     if (!bucketExists) {
-      await supabaseAdmin.storage.createBucket(testBucketName, {
+      await supabase.storage.createBucket(testBucketName, {
         public: true
       });
     }
@@ -38,7 +38,7 @@ describe("Storage Utils", () => {
       throw new Error("No file was uploaded in previous test");
     }
 
-    const url = getFileUrl(uploadedFilePath);
+    const url = getPublicUrl(uploadedFilePath);
     expect(url).toContain(testBucketName);
     expect(url).toContain(uploadedFilePath);
   });
