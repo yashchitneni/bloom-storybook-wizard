@@ -1,14 +1,14 @@
-
 import React from 'react';
 import { WizardData } from "@/types/wizard";
-import { useAuth } from "@/contexts/AuthContext";
+// import { useAuth } from "@/contexts/AuthContext"; // Not strictly needed if isUserLoggedIn is passed
 
 interface CheckoutCardProps {
   wizardData: WizardData;
   onEmailChange: (email: string) => void;
-  onSubmit: () => void;
+  onSubmit: () => void; // This seems for a general submit, not Stripe specific
   isSubmitting: boolean;
   isActive: boolean;
+  isUserLoggedIn: boolean; // Added prop
 }
 
 const CheckoutCard: React.FC<CheckoutCardProps> = ({
@@ -16,9 +16,10 @@ const CheckoutCard: React.FC<CheckoutCardProps> = ({
   onEmailChange,
   onSubmit,
   isSubmitting,
-  isActive
+  isActive,
+  isUserLoggedIn // Use this prop
 }) => {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Can rely on isUserLoggedIn prop now
 
   const requiredFieldsCompleted = () => {
     return (
@@ -39,7 +40,9 @@ const CheckoutCard: React.FC<CheckoutCardProps> = ({
         <div className="space-y-4">
           <h4 className="text-lg font-medium">Complete Your Story</h4>
           <p className="text-gray-600">
-            Enter your email to receive your personalized storybook and updates on your order.
+            {isUserLoggedIn 
+              ? "Your storybook and updates will be sent to your account email."
+              : "Enter your email to receive your personalized storybook and updates on your order."}
           </p>
           
           <div className="space-y-2">
@@ -47,12 +50,18 @@ const CheckoutCard: React.FC<CheckoutCardProps> = ({
             <input
               type="email"
               id="email"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-persimmon"
+              className={`w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-persimmon ${isUserLoggedIn ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               placeholder="your@email.com"
-              value={wizardData.email}
+              value={wizardData.email} // This will be auto-filled if user is logged in
               onChange={(e) => onEmailChange(e.target.value)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUserLoggedIn} // Disable if logged in or submitting
+              readOnly={isUserLoggedIn} // Make read-only if logged in
             />
+            {isUserLoggedIn && wizardData.email && (
+              <p className="text-xs text-gray-500 mt-1">
+                Logged in as {wizardData.email}. Purchases will be linked to this account.
+              </p>
+            )}
           </div>
         </div>
         
@@ -88,7 +97,7 @@ const CheckoutCard: React.FC<CheckoutCardProps> = ({
         
         <p className="text-xs text-center text-gray-500">
           By proceeding, you agree to our Terms of Service and Privacy Policy.
-          {!user && <span className="block mt-1">You'll be prompted to create an account after submission to access your story.</span>}
+          {!isUserLoggedIn && <span className="block mt-1">You'll be prompted to create an account after submission to access your story.</span>}
         </p>
       </div>
     </div>

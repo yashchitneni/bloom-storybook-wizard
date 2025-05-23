@@ -1,16 +1,16 @@
 import React from 'react';
 import { motion } from "framer-motion";
 import ChildProfileCard from '@/components/wizard/ChildProfileCard';
-import { useWizardPhotoUpload } from '@/hooks/wizard/use-wizard-photo-upload';
 
 interface ChildProfileSectionProps {
   onChildNameChange: (name: string) => void;
   onChildGenderChange: (gender: string) => void;
-  onChildPhotoUpload: (file: File) => void;
+  onChildPhotoUpload: (file: File) => Promise<void>;
   childName: string;
   childGender: string;
   childPhotoPreview: string | null;
   isActive: boolean;
+  isUploading: boolean;
 }
 
 const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
@@ -20,24 +20,17 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
   childName,
   childGender,
   childPhotoPreview,
-  isActive
+  isActive,
+  isUploading
 }) => {
-  const { isUploading } = useWizardPhotoUpload();
-  
-  // Create wrapped handlers to add logging
-  const handleChildNameChange = (name: string) => {
-    console.log("Child name changed:", name);
-    onChildNameChange(name);
-  };
-  
-  const handleChildGenderChange = (gender: string) => {
-    console.log("Child gender changed:", gender);
-    onChildGenderChange(gender);
-  };
-  
-  const handleChildPhotoUpload = (file: File) => {
-    console.log("Child photo uploaded:", file.name);
-    onChildPhotoUpload(file);
+  const handlePhotoUploadWrapper = async (file: File) => {
+    console.log("[ChildProfileSection] Photo selected:", file.name);
+    try {
+      await onChildPhotoUpload(file);
+      console.log("[ChildProfileSection] Photo upload process finished (success or handled failure).");
+    } catch (error) {
+      console.error("[ChildProfileSection] Error from onChildPhotoUpload:", error);
+    }
   };
   
   return (
@@ -50,9 +43,9 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
     >
       <h3 className="text-xl font-bold">Your Child</h3>
       <ChildProfileCard
-        onChildNameChange={handleChildNameChange}
-        onChildGenderChange={handleChildGenderChange}
-        onChildPhotoUpload={handleChildPhotoUpload}
+        onChildNameChange={onChildNameChange}
+        onChildGenderChange={onChildGenderChange}
+        onChildPhotoUpload={handlePhotoUploadWrapper}
         childName={childName}
         childGender={childGender}
         childPhotoPreview={childPhotoPreview}

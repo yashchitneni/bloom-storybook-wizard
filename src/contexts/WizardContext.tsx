@@ -1,6 +1,6 @@
-
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { WizardData } from '@/types/wizard';
+import { toast } from '@/components/ui/use-toast';
 
 // Initial state for the wizard
 const initialWizardState: WizardData = {
@@ -82,14 +82,17 @@ export const WizardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const savedState = localStorage.getItem('wizardData');
       if (savedState) {
         const parsedState = JSON.parse(savedState);
-        // Reset file objects that can't be stored in localStorage
+        // Reset file objects and previews that can't/shouldn't be stored in localStorage
         return {
           ...parsedState,
           photoFile: null,
+          photoPreview: null, // Ensure preview is not loaded
           childPhotoFile: null,
+          childPhotoPreview: null, // Ensure preview is not loaded
           characters: parsedState.characters?.map((character: any) => ({
             ...character,
-            photoFile: null
+            photoFile: null,
+            photoPreview: null // Ensure preview is not loaded for characters
           })) || []
         };
       }
@@ -106,20 +109,31 @@ export const WizardProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Save to localStorage whenever state changes
   useEffect(() => {
     try {
-      // Create a copy without file objects which can't be serialized
+      // Create a copy without file objects and previews which can't/shouldn't be serialized
       const stateToSave = {
         ...state,
         photoFile: null,
+        photoPreview: null, // Do not save photo preview
         childPhotoFile: null,
+        childPhotoPreview: null, // Do not save child photo preview
         characters: state.characters.map(character => ({
           ...character,
-          photoFile: null
+          photoFile: null,
+          photoPreview: null // Do not save character photo preview
         }))
       };
       localStorage.setItem('wizardData', JSON.stringify(stateToSave));
-      console.log('Wizard state saved to localStorage');
+      console.log('Wizard state successfully saved to localStorage (without previews)');
     } catch (error) {
+      // This catch block will now handle errors if stringifying stateToSave (after nulling previews) still fails
+      // though it's less likely now.
       console.error('Error saving wizard state to localStorage:', error);
+      // Potentially dispatch an action or show a global error to the user if this critical save fails
+      toast({
+        title: "Save Error",
+        description: "Could not save your progress. Local storage might be full or corrupted.",
+        variant: "destructive"
+      });
     }
   }, [state]);
 

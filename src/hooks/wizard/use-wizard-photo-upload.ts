@@ -46,12 +46,12 @@ export const useWizardPhotoUpload = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleChildPhotoUpload = (file: File): Promise<void> => {
+  const handleChildPhotoUpload = async (file: File): Promise<void> => {
     if (file.size === 0) {
       dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
       dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
       dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: null });
-      return Promise.resolve();
+      return;
     }
 
     const validationError = validateFile(file);
@@ -61,7 +61,10 @@ export const useWizardPhotoUpload = () => {
         description: validationError,
         variant: "destructive",
       });
-      return Promise.reject(new Error(validationError));
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: null });
+      throw new Error(validationError);
     }
 
     if (isUploading) {
@@ -69,74 +72,59 @@ export const useWizardPhotoUpload = () => {
       toast({
         title: "Upload in progress",
         description: alreadyUploadingMsg,
-        variant: "default", // Less aggressive than destructive
+        variant: "default",
       });
-      return Promise.reject(new Error(alreadyUploadingMsg));
+      throw new Error(alreadyUploadingMsg);
     }
 
     setIsUploading(true);
-
-    return new Promise((resolve, reject) => {
+    const previewPromise = new Promise<string | ArrayBuffer | null>((resolve, reject) => {
       const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        try {
-          dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: file });
-          dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: e.target?.result });
-          
-          const storagePath = await uploadFile(file, { folder: 'user-uploads/children' });
-          
-          if (storagePath) {
-            dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: storagePath });
-            toast({
-              title: "Photo uploaded successfully",
-              description: "Your child's photo has been saved.",
-            });
-            resolve();
-          } else {
-            dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
-            dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
-            dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: null });
-            const uploadFailedError = new Error("Failed to upload photo to storage.");
-            toast({
-              title: "Upload failed",
-              description: uploadFailedError.message + " Please ensure you are connected and try again.",
-              variant: "destructive",
-            });
-            reject(uploadFailedError);
-          }
-        } catch (error: any) {
-          console.error('Error in upload process:', error);
-          dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
-          dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
-          dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: null });
-          toast({
-            title: "Upload error",
-            description: error.message || "An unexpected error occurred during upload.",
-            variant: "destructive",
-          });
-          reject(error);
-        } finally {
-          setIsUploading(false);
-        }
-      };
-
-      reader.onerror = (error) => {
-        console.error('FileReader error:', error);
-        dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
-        dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
-        dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: null });
-        toast({
-          title: "File reading error",
-          description: "Could not read the selected file. Please try again.",
-          variant: "destructive",
-        });
-        setIsUploading(false);
-        reject(new Error("FileReader failed"));
-      };
-
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
       reader.readAsDataURL(file);
     });
+
+    try {
+      const previewResult = await previewPromise;
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: file });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: previewResult });
+
+      console.log("[useWizardPhotoUpload] Attempting to upload file:", file.name);
+      const storagePath = await uploadFile(file, { folder: 'user-uploads/children' });
+      
+      if (storagePath) {
+        console.log("[useWizardPhotoUpload] Upload successful, storagePath:", storagePath);
+        dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: storagePath });
+        toast({
+          title: "Photo uploaded successfully",
+          description: "Your child's photo has been saved.",
+        });
+      } else {
+        console.error("[useWizardPhotoUpload] Upload failed, storagePath is null or empty.");
+        dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: null });
+        toast({
+          title: "Upload failed",
+          description: "Could not save photo to storage. Please try again.",
+          variant: "destructive",
+        });
+        throw new Error("Upload to storage failed");
+      }
+    } catch (error: any) {
+      console.error("[useWizardPhotoUpload] Error during child photo upload process:", error);
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
+      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoUrl', value: null });
+      toast({
+        title: "Upload error",
+        description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsUploading(false);
+      console.log("[useWizardPhotoUpload] isUploading set to false.");
+    }
   };
 
   return {

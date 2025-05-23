@@ -1,149 +1,81 @@
-
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/components/ui/use-toast";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Card from "@/components/Card";
 import Button from "@/components/Button";
 
-const SignupPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchParams] = useSearchParams();
+const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { user, signUp } = useAuth();
 
-  // Get storybook ID and email from URL parameters
-  const storybookId = searchParams.get("storybook_id");
-  const emailParam = searchParams.get("email");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Redirect if already logged in
+  const claimOrderId = searchParams.get('claim_order_id');
+  const prefilledEmail = searchParams.get('email');
+
   useEffect(() => {
-    if (user) {
+    if (prefilledEmail) {
+      setEmail(prefilledEmail);
+    }
+  }, [prefilledEmail]);
+
+  useEffect(() => {
+    if (user && claimOrderId) {
+      const associateOrder = async () => {
+        console.log(`[SignupPage] User signed up. Attempting to associate order: ${claimOrderId}`);
+        try {
+          const { error: assocError } = await supabase.functions.invoke('associate-order-to-user', {
+            body: { order_id_to_claim: claimOrderId }
+          });
+          if (assocError) {
+            toast.error("Account created, but failed to link previous purchase: " + assocError.message);
+            console.error("[SignupPage] Error associating order:", assocError);
+          } else {
+            toast.success("Account created and previous purchase linked!");
+          }
+        } catch (e: any) {
+          toast.error("Account created, but an error occurred linking previous purchase: " + e.message);
+          console.error("[SignupPage] Exception associating order:", e);
+        }
+        navigate('/account');
+      };
+      associateOrder();
+    } else if (user) {
       navigate('/account');
     }
-  }, [user, navigate]);
-
-  // Set email from URL parameter if available
-  useEffect(() => {
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-  }, [emailParam]);
-
-  // Associate storybook with new user account
-  const associateStorybook = async (userId: string, userEmail: string) => {
-    try {
-      if (storybookId) {
-        // Update the storybook author_id where it matches the ID and email
-        const { error } = await supabase
-          .from('storybooks')
-          .update({ author_id: userId })
-          .match({ 
-            id: storybookId, 
-            email: userEmail,
-            author_id: null 
-          });
-
-        if (error) {
-          console.error("Error associating storybook:", error);
-          toast({
-            title: "Storybook association failed",
-            description: "Your account was created, but we couldn't link your storybook. Please contact support.",
-            variant: "destructive",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error in associateStorybook:", error);
-    }
-  };
+  }, [user, claimOrderId, navigate]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      toast({
-        title: "Missing information",
-        description: "Please fill out all fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please ensure both password fields match.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    setError(null);
     setIsLoading(true);
-    
     try {
-      // Sign up the user
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: window.location.origin + "/account",
-        }
-      });
-
-      if (signUpError) throw signUpError;
-      
-      // Auto-sign in after signup
-      if (data?.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{
-            id: data.user.id,
-            email: data.user.email
-          }]);
-          
-        if (profileError) {
-          console.error("Error creating profile:", profileError);
-        }
-        
-        // Associate storybook with the new user
-        await associateStorybook(data.user.id, email);
-        
-        toast({
-          title: "Account created!",
-          description: "Welcome to DearKidBooks!",
-        });
-        
-        navigate('/account');
-      }
-    } catch (error: any) {
-      console.error("Signup error:", error);
-      toast({
-        title: "Signup failed",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+      await signUp(email, password);
+    } catch (err: any) {
+      console.error("[SignupPage] Signup error:", err);
+      setError(err.message || "Failed to create account. Please try again.");
+      toast.error(err.message || "Failed to create account.");
     }
+    setIsLoading(false);
   };
+
+  if (user && !claimOrderId) {
+    return (
+      <div className="text-center p-10">
+        <p>You are already logged in.</p>
+        <Link to="/account" className="text-persimmon hover:underline">Go to your Account</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-select flex flex-col">
@@ -153,7 +85,7 @@ const SignupPage = () => {
           <div className="text-center">
             <h2 className="text-3xl font-bold text-persimmon font-fredoka">Create Your Account</h2>
             <p className="mt-2 text-sm text-gray-600">
-              {storybookId ? "Sign up to access your newly created storybook!" : "Create an account to get started"}
+              {claimOrderId ? "Sign up to access your newly created storybook!" : "Create an account to get started"}
             </p>
           </div>
           
@@ -171,9 +103,9 @@ const SignupPage = () => {
                   required 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
-                  disabled={!!emailParam} // Disable if email is from URL parameter
+                  disabled={!!prefilledEmail}
                   className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm ${
-                    emailParam ? "bg-gray-100" : "focus:outline-none focus:ring-persimmon focus:border-persimmon"
+                    prefilledEmail ? "bg-gray-100" : "focus:outline-none focus:ring-persimmon focus:border-persimmon"
                   }`} 
                 />
               </div>
@@ -220,9 +152,9 @@ const SignupPage = () => {
             <div className="mt-6">
               <p className="text-sm text-center">
                 Already have an account?{" "}
-                <a href="/auth" className="text-persimmon hover:text-persimmon-dark">
+                <Link to={claimOrderId ? `/login?claim_order_id=${claimOrderId}` : "/login"} className="text-persimmon hover:text-persimmon-dark">
                   Sign in
-                </a>
+                </Link>
               </p>
             </div>
           </Card>

@@ -151,7 +151,7 @@ serve(async (req: Request) => {
       // Forward to n8n webhook using async fetch
       try {
         const n8nResponse = await fetch(
-          "https://n8n.dearkidbooks.com/webhook/story-generate",
+          "https://yashchitneni.app.n8n.cloud/webhook/story-generate",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

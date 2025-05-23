@@ -1,11 +1,11 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from "framer-motion";
 import CheckoutCard from '@/components/wizard/CheckoutCard';
 import { toast } from 'sonner';
 import { useWizardContext } from '@/contexts/WizardContext';
 import { supabase } from '@/integrations/supabase/client';
 import { loadStripe } from '@stripe/stripe-js';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CheckoutSectionProps {
   onSubmit: () => void;
@@ -20,10 +20,27 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   isActive
 }) => {
   const { state: wizardData, dispatch, isSubmitting } = useWizardContext();
+  const { user } = useAuth();
+  
+  // Auto-fill email if user is logged in and email is not already in wizardData
+  useEffect(() => {
+    if (user && user.email && !wizardData.email) {
+      console.log("[CheckoutSection] User logged in, auto-filling email:", user.email);
+      dispatch({ type: 'UPDATE_FIELD', field: 'email', value: user.email });
+    }
+  }, [user, wizardData.email, dispatch]);
   
   // Handle email changes
   const handleEmailChange = (email: string) => {
-    console.log("Email changed:", email);
+    // Prevent email change if user is logged in, or handle accordingly
+    if (user && user.email) {
+      console.warn("[CheckoutSection] Attempted to change email while logged in. This is usually not allowed or should log the user out.");
+      // Optionally, you could allow it but it might complicate account linking.
+      // For now, we assume the auto-filled email for a logged-in user is the one to use.
+      // toast.info("Your account email is automatically used for checkout.");
+      return; 
+    }
+    console.log("Email changed manually:", email);
     dispatch({ type: 'UPDATE_FIELD', field: 'email', value: email });
   };
   
@@ -35,9 +52,8 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
     }
     
     try {
-      console.log("Creating Stripe checkout session with data:", wizardData);
+      console.log("Preparing customData for Stripe. Full wizardData:", wizardData);
       
-      // Extract only the data we want to send (no file objects)
       const customData = {
         childName: wizardData.childName,
         childGender: wizardData.childGender,
@@ -46,10 +62,15 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         subject: wizardData.subject,
         message: wizardData.message,
         style: wizardData.style,
-        customNote: wizardData.customNote || ""
+        customNote: wizardData.customNote || "",
+        childPhotoUrl: wizardData.childPhotoUrl || null,
+        // If user is logged in, pass their ID to be potentially stored directly
+        // This can simplify backend association if the webhook has access to user_id directly from metadata
+        userId: user ? user.id : null 
       };
       
-      // Call the Supabase Edge Function to create a checkout session
+      console.log("Sending this customData to stripe-checkout function:", customData);
+
       const { data, error } = await supabase.functions.invoke('stripe-checkout', {
         body: {
           email: wizardData.email,
@@ -108,6 +129,7 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         onSubmit={onSubmit} 
         isSubmitting={isSubmitting} 
         isActive={true} 
+        isUserLoggedIn={!!user}
       />
       
       {/* Stripe Checkout Button */}

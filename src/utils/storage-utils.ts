@@ -22,14 +22,9 @@ export const uploadFile = async (file: File, options: UploadOptions = {}): Promi
       return null;
     }
 
-    // Check if file is too large (50MB limit)
-    if (file.size > 50 * 1024 * 1024) {
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit - consider making this a constant
       console.error("[uploadFile] File too large:", file.size);
-      toast({
-        title: "Upload failed",
-        description: "File size must be less than 50MB",
-        variant: "destructive",
-      });
+      toast({ title: "Upload failed", description: "File size must be less than 50MB", variant: "destructive" });
       return null;
     }
 
@@ -38,7 +33,7 @@ export const uploadFile = async (file: File, options: UploadOptions = {}): Promi
     const fileName = `${Date.now()}_${userId ? userId.slice(0, 8) : "anonymous"}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
     
-    console.log(`[uploadFile] Starting upload process:`, {
+    console.log(`[uploadFile] Attempting to upload to:`, {
       bucket: BUCKET_NAME,
       path: filePath,
       fileSize: file.size,
@@ -46,64 +41,41 @@ export const uploadFile = async (file: File, options: UploadOptions = {}): Promi
       userId: userId || 'anonymous'
     });
     
-    // First check if bucket exists using admin client
-    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-    console.log('[uploadFile] Buckets returned by listBuckets:', buckets);
-    if (bucketError) {
-      console.error("[uploadFile] Error checking buckets:", bucketError);
-      throw bucketError;
-    }
-    
-    const bucketExists = buckets.some(b => b.name === BUCKET_NAME);
-    console.log(`[uploadFile] Bucket '${BUCKET_NAME}' exists:`, bucketExists);
-    
-    if (!bucketExists) {
-      console.error(`[uploadFile] Bucket '${BUCKET_NAME}' does not exist`);
-      throw new Error(`Storage bucket '${BUCKET_NAME}' does not exist`);
-    }
-    
-    // Use regular client for file upload (this respects RLS policies)
     const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
+      .from(BUCKET_NAME) // This will fail if BUCKET_NAME doesn't exist
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false // Consider if upsert: true is desired for some cases
       });
       
     if (error) {
-      console.error("[uploadFile] Error uploading file:", error);
-      toast({
-        title: "Upload failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error("[uploadFile] Error uploading file to Supabase storage:", error);
+      toast({ title: "Upload to Storage Failed", description: error.message, variant: "destructive" });
       return null;
     }
     
-    console.log("[uploadFile] File uploaded successfully:", {
-      path: filePath,
-      data: data
-    });
-
-    // Verify the file exists after upload
+    console.log("[uploadFile] File uploaded successfully to Supabase storage:", { path: filePath, data: data });
+    
+    // The verify step using .list(folder) might also have permission issues for anon users
+    // depending on RLS policies for SELECT on the objects. For now, let's assume public read or specific grants.
+    // If childPhotoUrl is still null later, this is another area to check RLS for SELECT.
     const { data: fileData, error: fileError } = await supabase.storage
       .from(BUCKET_NAME)
-      .list(folder);
+      .list(folder, { limit: 1, search: fileName }); // More specific listing
       
     if (fileError) {
-      console.error("[uploadFile] Error verifying file:", fileError);
+      console.warn("[uploadFile] Warning: Error verifying file after upload (RLS for SELECT?):", fileError);
+    } else if (fileData && fileData.length > 0 && fileData.find(f => f.name === fileName)) {
+      console.log("[uploadFile] File successfully verified in folder after upload:", fileData);
     } else {
-      console.log("[uploadFile] Files in folder after upload:", fileData);
+      console.warn("[uploadFile] Warning: File not found in folder after presumed successful upload. Path:", filePath);
     }
     
-    return filePath;
+    return filePath; // Return the path for the URL construction
+
   } catch (error: any) {
-    console.error("[uploadFile] File upload failed:", error);
-    toast({
-      title: "Upload failed",
-      description: "Something went wrong while uploading the file.",
-      variant: "destructive",
-    });
+    console.error("[uploadFile] Unexpected error in uploadFile function:", error);
+    toast({ title: "Upload Failed", description: "An unexpected error occurred during file upload.", variant: "destructive" });
     return null;
   }
 };

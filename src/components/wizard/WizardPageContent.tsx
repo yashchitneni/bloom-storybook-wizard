@@ -15,6 +15,7 @@ import { useWizardContext } from '@/contexts/WizardContext';
 import { useWizardLookupData } from '@/hooks/wizard/use-wizard-lookup-data';
 import { useWizardNavigation } from '@/hooks/wizard/use-wizard-navigation';
 import { useWizardCharacters } from '@/hooks/wizard/use-wizard-characters';
+import { useWizardPhotoUpload } from '@/hooks/wizard/use-wizard-photo-upload';
 
 interface WizardPageContentProps {
   isLoading: boolean;
@@ -39,6 +40,9 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
       }
     } 
   });
+  
+  // Get the real photo upload handler from our hook
+  const { handleChildPhotoUpload, isUploading: isChildPhotoUploading } = useWizardPhotoUpload();
   
   // Handlers for each step
   const handleSelectAge = (age: string) => {
@@ -80,25 +84,6 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
   const handleChildGenderChange = (childGender: string) => {
     console.log("Setting childGender in wizardData:", childGender);
     dispatch({ type: 'UPDATE_FIELD', field: 'childGender', value: childGender });
-  };
-
-  const handleChildPhotoUpload = (file: File) => {
-    if (file.size === 0) {
-      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: null });
-      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: null });
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoFile', value: file });
-      dispatch({ type: 'UPDATE_FIELD', field: 'childPhotoPreview', value: e.target?.result as string });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleChildPhotoUploadAsync = async (file: File) => {
-    console.log('[WizardPageContent] Calling real handleChildPhotoUpload with:', file);
-    await handleChildPhotoUpload(file);
   };
 
   // Get available subjects for selected theme
@@ -227,11 +212,12 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
           <ChildProfileSection
             onChildNameChange={handleChildNameChange}
             onChildGenderChange={handleChildGenderChange}
-            onChildPhotoUpload={handleChildPhotoUploadAsync}
+            onChildPhotoUpload={handleChildPhotoUpload}
             childName={wizardData.childName}
             childGender={wizardData.childGender}
             childPhotoPreview={wizardData.childPhotoPreview}
             isActive={true}
+            isUploading={isChildPhotoUploading}
           />
         )}
         
