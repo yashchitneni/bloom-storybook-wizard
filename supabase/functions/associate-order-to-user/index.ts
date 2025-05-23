@@ -44,6 +44,37 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Ensure user profile exists before attempting to link storybook
+    let { data: profile, error: profileFetchError } = await serviceClient
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profileFetchError) {
+      console.error(`[associate-order] Error fetching profile for user ${user.id}:`, profileFetchError);
+      return new Response(JSON.stringify({ error: 'Failed to verify user profile: ' + profileFetchError.message }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    if (!profile) {
+      console.log(`[associate-order] Profile not found for user ${user.id}. Creating now.`);
+      const { error: profileCreateError } = await serviceClient
+        .from('profiles')
+        .insert({ id: user.id, email: user.email }); // Assuming email is also a column in profiles
+
+      if (profileCreateError) {
+        console.error(`[associate-order] Error creating profile for user ${user.id}:`, profileCreateError);
+        return new Response(JSON.stringify({ error: 'Failed to create user profile: ' + profileCreateError.message }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        });
+      }
+      console.log(`[associate-order] Successfully created profile for user ${user.id}`);
+    }
+
     // Fetch the storybook record by stripe_session_id
     const { data: storybook, error: fetchError } = await serviceClient
       .from('storybooks')
