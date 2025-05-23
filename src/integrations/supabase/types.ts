@@ -134,6 +134,7 @@ export type Database = {
           pdf_url: string | null
           photo_url: string | null
           status: string
+          stripe_session_id: string | null
           style: string
           subject: string
           theme: string
@@ -153,6 +154,7 @@ export type Database = {
           pdf_url?: string | null
           photo_url?: string | null
           status?: string
+          stripe_session_id?: string | null
           style: string
           subject: string
           theme: string
@@ -172,6 +174,7 @@ export type Database = {
           pdf_url?: string | null
           photo_url?: string | null
           status?: string
+          stripe_session_id?: string | null
           style?: string
           subject?: string
           theme?: string
