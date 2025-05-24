@@ -30,18 +30,31 @@ serve(async (req) => {
       throw new Error("Email is required");
     }
     
-    // Log Stripe secret key presence (not value)
+    // Get Stripe secret key and determine environment
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeSecretKey) {
       console.error("[stripe-checkout] STRIPE_SECRET_KEY is missing or empty!");
-    } else {
-      console.log("[stripe-checkout] STRIPE_SECRET_KEY is present and loaded.");
+      throw new Error("Stripe secret key is required");
     }
     
+    // Detect environment based on Stripe key type
+    const isTestMode = stripeSecretKey.startsWith("sk_test_");
+    const environment = isTestMode ? "test" : "live";
+    
+    console.log(`[stripe-checkout] Environment: ${environment}`);
+    console.log("[stripe-checkout] STRIPE_SECRET_KEY is present and loaded.");
+    
+    // Get the appropriate price ID for the environment
+    const testPriceId = Deno.env.get("STRIPE_PRICE_ID_TEST") || "price_1RQtaNQLJPVbk0GnzR2F4EPT"; // Your test price ID
+    const livePriceId = Deno.env.get("STRIPE_PRICE_ID_LIVE") || "price_1RS768D73M4NkP7peWpponNH"; // Your live price ID
+    
+    const priceId = isTestMode ? testPriceId : livePriceId;
+    
+    console.log(`[stripe-checkout] Using price ID: ${priceId} (${environment} mode)`);
     console.log(`[stripe-checkout] Creating checkout session for email: ${email}`, customData);
     
     // Initialize Stripe
-    const stripe = new Stripe(stripeSecretKey || "", {
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
       httpClient: Stripe.createFetchHttpClient(),
     });
@@ -51,7 +64,7 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: 'price_1RQtaNQLJPVbk0GnzR2F4EPT', // Your specified price ID
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -61,10 +74,11 @@ serve(async (req) => {
       cancel_url: `${req.headers.get("origin")}/wizard`,
       metadata: {
         wizard_data: JSON.stringify(customData || {}),
+        environment: environment,
       },
     });
     
-    console.log(`[stripe-checkout] Checkout session created: ${session.id}`);
+    console.log(`[stripe-checkout] Checkout session created: ${session.id} in ${environment} mode`);
     
     return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
