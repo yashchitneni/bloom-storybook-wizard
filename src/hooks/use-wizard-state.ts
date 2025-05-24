@@ -15,7 +15,6 @@ export const useWizardState = () => {
     customNote: "",
     photoFile: null,
     photoPreview: null,
-    photoUrl: null, // Add missing photoUrl field
     style: "",
     email: "",
     moral: "",
@@ -26,7 +25,6 @@ export const useWizardState = () => {
     childGender: "",
     childPhotoFile: null,
     childPhotoPreview: null,
-    childPhotoUrl: null, // Add missing childPhotoUrl field
     
     // Characters
     characters: []
@@ -243,8 +241,7 @@ export const useWizardState = () => {
       relation: "",
       gender: "",
       photoFile: null,
-      photoPreview: null,
-      photoUrl: null // Add the missing photoUrl field
+      photoPreview: null
     };
     
     setWizardData({
