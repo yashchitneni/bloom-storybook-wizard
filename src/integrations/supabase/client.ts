@@ -13,8 +13,10 @@ export const supabase = createClient<Database>(
   SUPABASE_CONFIG.anonKey
 );
 
-// Create a service role client for admin operations
-export const supabaseAdmin = createClient<Database>(
-  SUPABASE_CONFIG.url,
-  SUPABASE_CONFIG.serviceRoleKey
-);
+// Create a service role client for admin operations ONLY if key exists and we're in a secure environment
+export const supabaseAdmin = SUPABASE_CONFIG.serviceRoleKey 
+  ? createClient<Database>(
+      SUPABASE_CONFIG.url,
+      SUPABASE_CONFIG.serviceRoleKey
+    )
+  : null; // or just remove this entirely
