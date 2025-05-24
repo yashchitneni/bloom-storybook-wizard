@@ -226,11 +226,12 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
       <div className="wizard-footer text-center mt-8">
         <button 
           type="button" 
-          className="inline-block w-full md:w-auto bg-persimmon hover:bg-persimmon/90 text-white font-medium py-3 px-6 rounded-lg transition-all"
+          style={{ backgroundColor: '#D2691E' }}
+          className="inline-block w-full md:w-auto text-white font-bold text-lg py-4 px-10 rounded-xl border-4 border-white shadow-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#D2691E] focus:ring-opacity-50 hover:brightness-90"
           onClick={handleStripeCheckout}
           disabled={isSubmitting || !wizardData.email || !wizardData.childPhotoUrl || isChildPhotoUploading || !!validateCharacters(wizardData.characters) || wizardData.characters.some(c => isUploadingCharacterPhoto[c.id])}
         >
-          Create My Story — $7.99
+          Create My Story — $9.99
         </button>
       </div>
     </motion.section>
