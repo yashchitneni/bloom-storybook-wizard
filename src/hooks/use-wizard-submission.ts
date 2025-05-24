@@ -1,8 +1,35 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { WizardData } from "@/types/wizard";
 import { useNavigate } from "react-router-dom";
+import { getFileUrl } from "@/utils/storage-utils";
+
+// Helper function to upload files to Supabase storage
+const uploadFile = async (file: File, options: { folder: string, userId?: string } = { folder: 'uploads' }) => {
+  if (!file) return null;
+  
+  const { folder, userId } = options;
+  const fileExt = file.name.split('.').pop();
+  const filePath = `${folder}/${userId ? `${userId}/` : ''}${Date.now()}.${fileExt}`;
+  
+  try {
+    const { data, error } = await supabase.storage
+      .from('images')
+      .upload(filePath, file);
+      
+    if (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+    
+    return filePath;
+  } catch (error) {
+    console.error('Error in uploadFile:', error);
+    return null;
+  }
+};
 
 export const useWizardSubmission = (
   getWizardData: () => WizardData, // Changed to a function that returns the latest state
@@ -149,6 +176,7 @@ export const useWizardSubmission = (
         customNote: "",
         photoFile: null,
         photoPreview: null,
+        photoUrl: null, // Add missing photoUrl field
         style: "",
         email: "",
         moral: "",
@@ -156,7 +184,8 @@ export const useWizardSubmission = (
         childName: "",
         childGender: "",
         childPhotoFile: null,
-        childPhotoPreview: null,
+        childPhotoPreview: null, 
+        childPhotoUrl: null, // Add missing childPhotoUrl field
         characters: []
       });
 
