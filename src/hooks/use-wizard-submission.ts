@@ -75,7 +75,6 @@ export const useWizardSubmission = (
           child_photo_url: childPhotoUrl,
           photo_url: mainPhotoUrl,
           email: wizardData.email,
-          moral: wizardData.moral || null,
           status: "draft", // Default status is draft
         })
         .select('*')  // Select all columns to avoid missing fields
@@ -151,8 +150,6 @@ export const useWizardSubmission = (
         photoPreview: null,
         style: "",
         email: "",
-        moral: "",
-        specialDetails: "",
         childName: "",
         childGender: "",
         childPhotoFile: null,

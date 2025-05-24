@@ -17,16 +17,10 @@ export const useWizardState = () => {
     photoPreview: null,
     style: "",
     email: "",
-    moral: "",
-    specialDetails: "",
-    
-    // New child profile fields
     childName: "",
     childGender: "",
     childPhotoFile: null,
     childPhotoPreview: null,
-    
-    // Characters
     characters: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);

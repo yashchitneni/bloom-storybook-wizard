@@ -13,7 +13,6 @@ const initialWizardState: WizardData = {
   photoPreview: null,
   style: "",
   email: "",
-  moral: "",
   specialDetails: "",
   childName: "",
   childGender: "",

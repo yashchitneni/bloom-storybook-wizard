@@ -2132,25 +2132,24 @@ CREATE TABLE public.story_images (
 -- Name: storybooks; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.storybooks (
-    id uuid DEFAULT extensions.uuid_generate_v4() NOT NULL,
-    author_id uuid,
-    theme text NOT NULL,
-    subject text NOT NULL,
-    message text NOT NULL,
-    custom_note text,
-    age_category text NOT NULL,
-    photo_url text,
-    style text NOT NULL,
-    status text DEFAULT 'pending'::text NOT NULL,
-    pdf_url text,
-    created_at timestamp without time zone DEFAULT now(),
-    child_name text DEFAULT 'Your Child'::text NOT NULL,
-    child_gender text DEFAULT ''::text NOT NULL,
-    child_photo_url text,
-    moral text DEFAULT ''::text,
-    email text DEFAULT ''::text NOT NULL,
-    stripe_session_id text
+CREATE TABLE IF NOT EXISTS public.storybooks (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamp with time zone DEFAULT now(),
+  author_id uuid REFERENCES public.profiles(id),
+  theme text NOT NULL,
+  subject text NOT NULL,
+  message text NOT NULL,
+  custom_note text,
+  age_category text NOT NULL,
+  style text NOT NULL,
+  child_name text NOT NULL,
+  child_gender text NOT NULL,
+  child_photo_url text,
+  status text DEFAULT 'draft',
+  pdf_url text,
+  photo_url text,
+  email text NOT NULL,
+  stripe_session_id text
 );
 
 

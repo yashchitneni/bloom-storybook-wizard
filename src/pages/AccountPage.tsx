@@ -59,7 +59,6 @@ const AccountPage = () => {
             pdf_url: book.pdf_url,
             photo_url: book.photo_url,
             created_at: book.created_at || new Date().toISOString(),
-            moral: book.moral || '',
             email: book.email || ''
           }));
           setStorybooks(processedData);

@@ -136,12 +136,10 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         style: wizardData.style,
         child_name: wizardData.childName,
         child_gender: wizardData.childGender,
-        child_photo_url: wizardData.childPhotoUrl, // Already uploaded and URL in wizardData
-        // photo_url: wizardData.photoUrl, // If you have a main story photo distinct from child photo
+        child_photo_url: wizardData.childPhotoUrl,
         email: wizardData.email,
-        moral: wizardData.moral || null,
-        status: "pending_payment", // Or a similar status indicating checkout has started
-        stripe_session_id: stripeSessionId, // Save the Stripe session ID
+        status: "pending_payment",
+        stripe_session_id: stripeSessionId,
       };
       console.log("[CheckoutSection] Storybook payload about to be inserted:", JSON.stringify(storybookPayload, null, 2));
       const { data: sbData, error: sbError } = await supabase
