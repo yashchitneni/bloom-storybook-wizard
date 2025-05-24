@@ -185,7 +185,6 @@ serve(async (req: Request) => {
         })),
         // Include other DB fields if n8n needs them
         storybookId: storybookIdFromDb, 
-        moral: storybookDetailsFromDb?.moral || wizardData.moral || "",
         email: session.customer_details?.email || session.customer_email || storybookDetailsFromDb?.email || "", // Prioritize Stripe email
       };
 
@@ -239,10 +238,6 @@ serve(async (req: Request) => {
             style: n8nWizardData.style || "",
             custom_note: n8nWizardData.customNote || null,
             child_photo_url: n8nWizardData.childPhotoUrl || null,
-            moral: n8nWizardData.moral || null,
-            // status: "payment_received", // Set by your application logic, possibly before this webhook
-            // If the storybook is created *before* checkout, its status might already be set.
-            // If created *by* this webhook, 'payment_received' or 'pending_fulfillment' is appropriate.
             status: "payment_received", 
             stripe_session_id: session.id // Critical for linking
           };

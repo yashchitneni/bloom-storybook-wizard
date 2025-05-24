@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { WizardData } from '@/types/wizard';
 
@@ -37,43 +36,32 @@ const PreviewCard: React.FC<PreviewCardProps> = ({
             <div>
               <h4 className="text-lg font-bold text-gray-900">Your Story Details</h4>
               <div className="mt-2">
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex">
-                    <span className="font-medium w-28">Age Range:</span>
-                    <span>{wizardData.age}</span>
-                  </li>
-                  <li className="flex">
+                <div className="space-y-2">
+                  <div className="flex">
                     <span className="font-medium w-28">Theme:</span>
                     <span>{wizardData.theme}</span>
-                  </li>
-                  <li className="flex">
-                    <span className="font-medium w-28">Subject:</span>
-                    <span>{wizardData.subject}</span>
-                  </li>
-                  <li className="flex">
-                    <span className="font-medium w-28">Message:</span>
-                    <span>{wizardData.message}</span>
-                  </li>
-                  <li className="flex">
+                  </div>
+                  <div className="flex">
                     <span className="font-medium w-28">Style:</span>
                     <span>{wizardData.style}</span>
-                  </li>
-                  {wizardData.moral && (
-                    <li className="flex">
-                      <span className="font-medium w-28">Moral:</span>
-                      <span>{wizardData.moral}</span>
-                    </li>
+                  </div>
+                  <div className="flex">
+                    <span className="font-medium w-28">Subject:</span>
+                    <span>{wizardData.subject}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-medium w-28">Message:</span>
+                    <span>{wizardData.message}</span>
+                  </div>
+                  {wizardData.customNote && (
+                    <div className="flex">
+                      <span className="font-medium w-28">Custom Note:</span>
+                      <span>{wizardData.customNote}</span>
+                    </div>
                   )}
-                </ul>
+                </div>
               </div>
             </div>
-            
-            {wizardData.customNote && (
-              <div>
-                <h4 className="text-md font-bold text-gray-900">Personal Note</h4>
-                <p className="mt-1 text-gray-700 bg-gray-50 p-3 rounded-md italic">"{wizardData.customNote}"</p>
-              </div>
-            )}
             
             {wizardData.specialDetails && (
               <div>

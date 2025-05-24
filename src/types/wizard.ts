@@ -1,25 +1,54 @@
 export interface WizardData {
+  childName: string;
+  childGender: string;
+  age?: string;
+  theme?: string;
+  subject?: string;
+  message?: string;
+  style?: string;
+  customNote?: string;
+  childPhotoUrl?: string;
+  characters?: Character[];
+  email?: string;
+}
+
+export interface WizardState {
+  childName: string;
+  childGender: string;
   age: string;
   theme: string;
   subject: string;
   message: string;
-  customNote: string;
-  photoFile: File | null;
-  photoPreview: string | null;
   style: string;
-  email: string;
-  moral?: string;
-  specialDetails?: string;
-  
-  // Child profile fields
-  childName: string;
-  childGender: string;
-  childPhotoFile: File | null;
-  childPhotoPreview: string | null;
-  childPhotoUrl: string | null;
-  
-  // Additional characters
+  customNote: string;
+  childPhotoUrl: string;
   characters: Character[];
+  email: string;
+}
+
+export interface WizardStepProps {
+  onNext: () => void;
+  onBack: () => void;
+  onSelectTheme: (theme: string) => void;
+  selectedTheme: string;
+  onSelectStyle: (style: string) => void;
+  selectedStyle: string;
+  onSelectAge: (age: string) => void;
+  selectedAge: string;
+  onSelectGender: (gender: string) => void;
+  selectedGender: string;
+  onSelectSubject: (subject: string) => void;
+  selectedSubject: string;
+  onSelectMessage: (message: string) => void;
+  selectedMessage: string;
+  onSelectCustomNote: (note: string) => void;
+  selectedCustomNote: string;
+  onSelectChildPhoto: (url: string) => void;
+  selectedChildPhoto: string;
+  onSelectCharacter: (character: Character) => void;
+  selectedCharacters: Character[];
+  onSelectEmail: (email: string) => void;
+  selectedEmail: string;
 }
 
 export interface Character {
@@ -48,7 +77,6 @@ export interface Storybook {
   pdf_url: string | null;
   photo_url: string | null;
   created_at: string;
-  moral?: string;
   email?: string;
 }
 
@@ -65,17 +93,6 @@ export interface ThemeSelectionStepProps {
   onSelectTheme: (theme: string) => void;
   selectedTheme: string;
   themes: string[];
-}
-
-export interface StorySparkStepProps {
-  onNext: () => void;
-  onPrevious: () => void;
-  onSelectTheme: (theme: string) => void;
-  onSelectMoral: (moral: string) => void;
-  onSpecialDetailsChange: (details: string) => void;
-  selectedTheme: string;
-  selectedMoral: string;
-  specialDetails: string;
 }
 
 export interface SubjectSelectionStepProps {

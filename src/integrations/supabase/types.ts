@@ -130,7 +130,6 @@ export type Database = {
           email: string
           id: string
           message: string
-          moral: string | null
           pdf_url: string | null
           photo_url: string | null
           status: string
@@ -147,10 +146,9 @@ export type Database = {
           child_photo_url?: string | null
           created_at?: string | null
           custom_note?: string | null
-          email?: string
+          email: string
           id?: string
           message: string
-          moral?: string | null
           pdf_url?: string | null
           photo_url?: string | null
           status?: string
@@ -170,7 +168,6 @@ export type Database = {
           email?: string
           id?: string
           message?: string
-          moral?: string | null
           pdf_url?: string | null
           photo_url?: string | null
           status?: string
@@ -362,3 +359,51 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+export interface Storybook {
+  id: string;
+  created_at: string;
+  email: string;
+  child_name: string;
+  child_gender: string;
+  age_category: string;
+  theme: string;
+  subject: string;
+  message: string;
+  style: string;
+  custom_note: string | null;
+  child_photo_url: string | null;
+  status: string;
+  stripe_session_id: string;
+  characters: Character[];
+}
+
+export interface StorybookInsert {
+  email: string;
+  child_name: string;
+  child_gender: string;
+  age_category: string;
+  theme: string;
+  subject: string;
+  message: string;
+  style: string;
+  custom_note?: string | null;
+  child_photo_url?: string | null;
+  status: string;
+  stripe_session_id: string;
+}
+
+export interface StorybookUpdate {
+  email?: string;
+  child_name?: string;
+  child_gender?: string;
+  age_category?: string;
+  theme?: string;
+  subject?: string;
+  message?: string;
+  style?: string;
+  custom_note?: string | null;
+  child_photo_url?: string | null;
+  status?: string;
+  stripe_session_id?: string;
+}

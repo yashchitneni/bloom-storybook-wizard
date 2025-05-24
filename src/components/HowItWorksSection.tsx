@@ -1,4 +1,3 @@
-
 import Card from "./Card";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
@@ -17,7 +16,7 @@ const HowItWorksSection = () => {
     {
       icon: "🪄",
       title: "Pick Adventure",
-      description: "Select a theme, moral, and art style for a personalized experience."
+      description: "Select a theme and art style for a personalized experience."
     },
     {
       icon: "📚",
