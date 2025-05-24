@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
@@ -14,13 +13,62 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const claimOrderId = searchParams.get('claim_order_id');
 
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/wizard');
+      // If there's an order to claim, go to account page after claiming
+      if (claimOrderId) {
+        handleOrderClaim();
+      } else {
+        navigate('/wizard');
+      }
     }
-  }, [user, navigate]);
+  }, [user, navigate, claimOrderId]);
+
+  // Handle order claiming after login
+  const handleOrderClaim = async () => {
+    if (!claimOrderId || !user) return;
+
+    try {
+      console.log('[Auth] Attempting to claim order:', claimOrderId);
+      
+      const { data, error } = await supabase.functions.invoke('associate-order-to-user', {
+        body: { 
+          order_id_to_claim: claimOrderId,
+          story_email: user.email 
+        }
+      });
+
+      if (error) {
+        console.error('[Auth] Order claim error:', error);
+        toast({
+          title: "Order claiming failed",
+          description: "We couldn't associate this order with your account. Please contact support.",
+          variant: "destructive"
+        });
+      } else {
+        console.log('[Auth] Order claimed successfully:', data);
+        toast({
+          title: "Order claimed successfully!",
+          description: "Your storybook has been added to your account.",
+        });
+      }
+      
+      // Navigate to account page to see the storybook
+      navigate('/account');
+    } catch (error) {
+      console.error('[Auth] Order claim failed:', error);
+      toast({
+        title: "Order claiming failed",
+        description: "Something went wrong. Please try again or contact support.",
+        variant: "destructive"
+      });
+      navigate('/account'); // Still navigate to account page
+    }
+  };
 
   // Return null during the redirect to avoid flickering
   if (user) return null;
@@ -72,7 +120,7 @@ const Auth = () => {
             description: "Welcome to DearKidBooks!"
           });
             
-          navigate('/wizard');
+          // Note: The useEffect will handle navigation and order claiming
         }
       } else {
         // Sign in
@@ -88,7 +136,7 @@ const Auth = () => {
           description: "You're now signed in."
         });
         
-        navigate('/wizard');
+        // Note: The useEffect will handle navigation and order claiming
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -110,6 +158,11 @@ const Auth = () => {
           <p className="mt-2 text-sm text-gray-600">
             {isSignUp ? "Create your account" : "Sign in to your account"}
           </p>
+          {claimOrderId && (
+            <p className="mt-2 text-sm text-persimmon font-medium">
+              🎉 Complete your login to access your new storybook!
+            </p>
+          )}
         </div>
         
         <Card className="p-6">
