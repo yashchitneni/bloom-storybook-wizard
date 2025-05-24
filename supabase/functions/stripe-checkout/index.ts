@@ -32,6 +32,18 @@ serve(async (req) => {
     
     // Get Stripe secret key and determine environment
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const testPriceId = Deno.env.get("STRIPE_PRICE_ID_TEST");
+    const livePriceId = Deno.env.get("STRIPE_PRICE_ID_LIVE");
+    
+    // Debug logging for environment variables
+    console.log(`[stripe-checkout] STRIPE_SECRET_KEY exists: ${!!stripeSecretKey}`);
+    console.log(`[stripe-checkout] STRIPE_SECRET_KEY starts with sk_test_: ${stripeSecretKey?.startsWith("sk_test_")}`);
+    console.log(`[stripe-checkout] STRIPE_SECRET_KEY starts with sk_live_: ${stripeSecretKey?.startsWith("sk_live_")}`);
+    console.log(`[stripe-checkout] STRIPE_PRICE_ID_TEST exists: ${!!testPriceId}`);
+    console.log(`[stripe-checkout] STRIPE_PRICE_ID_LIVE exists: ${!!livePriceId}`);
+    console.log(`[stripe-checkout] STRIPE_PRICE_ID_TEST value: ${testPriceId}`);
+    console.log(`[stripe-checkout] STRIPE_PRICE_ID_LIVE value: ${livePriceId}`);
+    
     if (!stripeSecretKey) {
       console.error("[stripe-checkout] STRIPE_SECRET_KEY is missing or empty!");
       throw new Error("Stripe secret key is required");
@@ -42,13 +54,12 @@ serve(async (req) => {
     const environment = isTestMode ? "test" : "live";
     
     console.log(`[stripe-checkout] Environment: ${environment}`);
-    console.log("[stripe-checkout] STRIPE_SECRET_KEY is present and loaded.");
     
     // Get the appropriate price ID for the environment
-    const testPriceId = Deno.env.get("STRIPE_PRICE_ID_TEST") || "price_1RQtaNQLJPVbk0GnzR2F4EPT"; // Your test price ID
-    const livePriceId = Deno.env.get("STRIPE_PRICE_ID_LIVE") || "price_1RS768D73M4NkP7peWpponNH"; // Your live price ID
+    const defaultTestPriceId = "price_1RQtaNQLJPVbk0GnzR2F4EPT"; // Your test price ID
+    const defaultLivePriceId = "price_1RS768D73M4NkP7peWpponNH"; // Your live price ID
     
-    const priceId = isTestMode ? testPriceId : livePriceId;
+    const priceId = isTestMode ? (testPriceId || defaultTestPriceId) : (livePriceId || defaultLivePriceId);
     
     console.log(`[stripe-checkout] Using price ID: ${priceId} (${environment} mode)`);
     console.log(`[stripe-checkout] Creating checkout session for email: ${email}`, customData);
