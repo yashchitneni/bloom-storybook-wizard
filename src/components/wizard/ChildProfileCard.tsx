@@ -14,6 +14,9 @@ interface ChildProfileCardProps {
   childPhotoPreview: string | null;
   isActive: boolean;
   isUploading?: boolean;
+  nameError?: boolean;
+  genderError?: boolean;
+  photoError?: boolean;
 }
 
 const ChildProfileCard: React.FC<ChildProfileCardProps> = ({
@@ -24,7 +27,10 @@ const ChildProfileCard: React.FC<ChildProfileCardProps> = ({
   childGender,
   childPhotoPreview,
   isActive,
-  isUploading = false
+  isUploading = false,
+  nameError = false,
+  genderError = false,
+  photoError = false
 }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -76,7 +82,8 @@ const ChildProfileCard: React.FC<ChildProfileCardProps> = ({
           ) : (
             <div className={cn(
               "upload-dashed relative flex items-center justify-center",
-              "border-2 border-dashed border-gray-200 rounded-lg bg-gray-50",
+              "border-2 border-dashed rounded-lg bg-gray-50",
+              photoError ? "border-red-500" : "border-gray-200",
               "h-40 overflow-hidden",
               isActive ? "cursor-pointer" : "cursor-not-allowed",
               isUploading && "opacity-50 cursor-not-allowed"
@@ -107,10 +114,8 @@ const ChildProfileCard: React.FC<ChildProfileCardProps> = ({
               </label>
             </div>
           )}
-          {isActive && !childPhotoPreview && !isUploading && (
-            <p className="text-sm text-red-500 mt-1">
-              Photo is required
-            </p>
+          {photoError && (
+            <p className="text-xs text-red-500 mt-1">Child's photo is required</p>
           )}
         </div>
 
@@ -124,7 +129,11 @@ const ChildProfileCard: React.FC<ChildProfileCardProps> = ({
               onChange={(e) => onChildNameChange(e.target.value)}
               placeholder="Enter child's name"
               disabled={!isActive || isUploading}
+              className={nameError ? "border-red-500 focus:border-red-500" : ""}
             />
+            {nameError && (
+              <p className="text-xs text-red-500 mt-1">Child's name is required</p>
+            )}
           </div>
           <div>
             <Label>Gender</Label>
@@ -132,7 +141,7 @@ const ChildProfileCard: React.FC<ChildProfileCardProps> = ({
               value={childGender}
               onValueChange={onChildGenderChange}
               disabled={!isActive || isUploading}
-              className="flex gap-4 mt-2"
+              className={cn("flex gap-4 mt-2", genderError ? "border border-red-500 rounded-md p-2" : "")}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="Boy" id="boy" />
@@ -143,6 +152,9 @@ const ChildProfileCard: React.FC<ChildProfileCardProps> = ({
                 <Label htmlFor="girl">Girl</Label>
               </div>
             </RadioGroup>
+            {genderError && (
+              <p className="text-xs text-red-500 mt-1">Child's gender is required</p>
+            )}
           </div>
         </div>
       </div>

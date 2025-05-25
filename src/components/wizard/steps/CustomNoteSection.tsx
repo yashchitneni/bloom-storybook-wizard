@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { motion } from "framer-motion";
 import CustomNoteCard from '@/components/wizard/CustomNoteCard';
+import { toast } from '@/components/ui/use-toast';
 
 interface CustomNoteSectionProps {
   onCustomNoteChange: (customNote: string) => void;

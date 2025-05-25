@@ -251,11 +251,6 @@ const WizardPageContent: React.FC<WizardPageContentProps> = ({ isLoading, handle
             isActive={true}
           />
         )}
-        
-        {/* Final call to action if not all fields completed */}
-        {(!wizardData.age || !wizardData.theme || !isChildProfileComplete) && (
-          <ContinueButton onClick={handleContinueClick} />
-        )}
       </div>
     </div>
   );

@@ -68,7 +68,7 @@ export const useWizardSubmission = (
           theme: wizardData.theme,
           subject: wizardData.subject,
           message: wizardData.message,
-          custom_note: wizardData.customNote || null,
+          custom_note: wizardData.customNote || "",
           style: wizardData.style,
           child_name: wizardData.childName,
           child_gender: wizardData.childGender,

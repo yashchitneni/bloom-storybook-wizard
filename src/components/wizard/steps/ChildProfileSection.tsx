@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from "framer-motion";
 import ChildProfileCard from '@/components/wizard/ChildProfileCard';
 
@@ -11,6 +11,7 @@ interface ChildProfileSectionProps {
   childPhotoPreview: string | null;
   isActive: boolean;
   isUploading: boolean;
+  onNext: () => void;
 }
 
 const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
@@ -21,8 +22,11 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
   childGender,
   childPhotoPreview,
   isActive,
-  isUploading
+  isUploading,
+  onNext
 }) => {
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+
   const handlePhotoUploadWrapper = async (file: File) => {
     console.log("[ChildProfileSection] Photo selected:", file.name);
     try {
@@ -32,7 +36,7 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
       console.error("[ChildProfileSection] Error from onChildPhotoUpload:", error);
     }
   };
-  
+
   return (
     <motion.section 
       id="step-7"
@@ -51,6 +55,9 @@ const ChildProfileSection: React.FC<ChildProfileSectionProps> = ({
         childPhotoPreview={childPhotoPreview}
         isActive={true}
         isUploading={isUploading}
+        nameError={missingFields.includes("name")}
+        genderError={missingFields.includes("gender")}
+        photoError={missingFields.includes("photo")}
       />
     </motion.section>
   );

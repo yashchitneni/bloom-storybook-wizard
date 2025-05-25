@@ -8,6 +8,18 @@ import { X, PlusCircle, User, Loader2 } from "lucide-react";
 import { Character, CharactersCardProps } from '@/types/wizard';
 import { cn } from '@/lib/utils';
 
+interface CharactersCardProps {
+  characters: Character[];
+  onAddCharacter: () => void;
+  onUpdateCharacter: (id: string, field: string, value: any) => void;
+  onRemoveCharacter: (id: string) => void;
+  onCharacterPhotoUpload: (id: string, file: File | null) => void;
+  isUploadingCharacterPhoto: Record<string, boolean>;
+  isActive: boolean;
+  maxCharacters?: number;
+  characterFieldErrors?: Record<string, { name: boolean; gender: boolean; photo: boolean }>;
+}
+
 const CharactersCard: React.FC<CharactersCardProps> = ({
   characters,
   onAddCharacter,
@@ -16,7 +28,8 @@ const CharactersCard: React.FC<CharactersCardProps> = ({
   onCharacterPhotoUpload,
   isUploadingCharacterPhoto,
   isActive,
-  maxCharacters = 4
+  maxCharacters = 4,
+  characterFieldErrors = {}
 }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
     console.log("[CharactersCard] handleFileChange triggered for char ID:", id, "File selected:", e.target.files ? e.target.files[0]?.name : 'No file');
@@ -49,22 +62,23 @@ const CharactersCard: React.FC<CharactersCardProps> = ({
       <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
         <div className="space-y-8">
           {/* Character Cards */}
-          {characters.map((character) => (
-            <div key={character.id} className="border border-gray-200 rounded-lg p-4 relative">
-              <button
-                onClick={() => isActive && onRemoveCharacter(character.id)}
-                className="absolute right-2 top-2 text-gray-400 hover:text-red-500"
-                aria-label="Remove character"
-                disabled={!isActive || isUploadingCharacterPhoto[character.id]}
-              >
-                <X size={20} />
-              </button>
-              
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Photo Upload */}
-                <div className="flex-shrink-0 w-full md:w-1/4">
+          {characters.map((character) => {
+            const errors = characterFieldErrors[character.id] || {};
+            return (
+              <div key={character.id} className="border border-gray-200 rounded-lg p-4 relative">
+                <button
+                  onClick={() => isActive && onRemoveCharacter(character.id)}
+                  className="absolute right-2 top-2 text-gray-400 hover:text-red-500"
+                  aria-label="Remove character"
+                  disabled={!isActive || isUploadingCharacterPhoto[character.id]}
+                >
+                  <X size={20} />
+                </button>
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Photo Upload */}
                   <div className={cn(
-                    "border-2 border-dashed border-gray-300 rounded-lg text-center h-full flex flex-col justify-center items-center",
+                    "border-2 border-dashed rounded-lg text-center h-full flex flex-col justify-center items-center",
+                    errors.photo ? "border-red-500" : "border-gray-300",
                     !character.photoPreview ? 'p-4' : 'p-2',
                     isUploadingCharacterPhoto[character.id] && 'opacity-50'
                   )}>
@@ -111,67 +125,76 @@ const CharactersCard: React.FC<CharactersCardProps> = ({
                         </label>
                       </>
                     )}
-                  </div>
-                </div>
-
-                {/* Character Details */}
-                <div className="flex-1 space-y-3">
-                  <div>
-                    <Label className="text-sm">Name</Label>
-                    <Input 
-                      type="text"
-                      placeholder="Character name"
-                      value={character.name}
-                      onChange={(e) => onUpdateCharacter(character.id, "name", e.target.value)}
-                      disabled={!isActive || isUploadingCharacterPhoto[character.id]}
-                      className="w-full"
-                    />
+                    {errors.photo && (
+                      <p className="text-xs text-red-500 mt-1">Character photo is required</p>
+                    )}
                   </div>
 
-                  <div>
-                    <Label className="text-sm">Relation</Label>
-                    <Select 
-                      value={character.relation} 
-                      onValueChange={(value) => onUpdateCharacter(character.id, "relation", value)}
-                      disabled={!isActive || isUploadingCharacterPhoto[character.id]}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select relation" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {relationOptions.map((option) => (
-                          <SelectItem key={option} value={option}>{option}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* Character Details */}
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <Label className="text-sm">Name</Label>
+                      <Input 
+                        type="text"
+                        placeholder="Character name"
+                        value={character.name}
+                        onChange={(e) => onUpdateCharacter(character.id, "name", e.target.value)}
+                        disabled={!isActive || isUploadingCharacterPhoto[character.id]}
+                        className={cn("w-full", errors.name ? "border-red-500 focus:border-red-500" : "")}
+                      />
+                      {errors.name && (
+                        <p className="text-xs text-red-500 mt-1">Character name is required</p>
+                      )}
+                    </div>
 
-                  <div>
-                    <Label className="text-sm">Gender</Label>
-                    <RadioGroup 
-                      value={character.gender} 
-                      onValueChange={(value) => onUpdateCharacter(character.id, "gender", value)}
-                      disabled={!isActive || isUploadingCharacterPhoto[character.id]}
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center">
-                        <RadioGroupItem id={`gender-boy-${character.id}`} value="Boy" />
-                        <Label htmlFor={`gender-boy-${character.id}`} className="ml-2 text-sm">Boy</Label>
-                      </div>
-                      <div className="flex items-center">
-                        <RadioGroupItem id={`gender-girl-${character.id}`} value="Girl" />
-                        <Label htmlFor={`gender-girl-${character.id}`} className="ml-2 text-sm">Girl</Label>
-                      </div>
-                      <div className="flex items-center">
-                        <RadioGroupItem id={`gender-other-${character.id}`} value="Other" />
-                        <Label htmlFor={`gender-other-${character.id}`} className="ml-2 text-sm">Other</Label>
-                      </div>
-                    </RadioGroup>
+                    <div>
+                      <Label className="text-sm">Relation</Label>
+                      <Select 
+                        value={character.relation} 
+                        onValueChange={(value) => onUpdateCharacter(character.id, "relation", value)}
+                        disabled={!isActive || isUploadingCharacterPhoto[character.id]}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select relation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {relationOptions.map((option) => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm">Gender</Label>
+                      <RadioGroup 
+                        value={character.gender} 
+                        onValueChange={(value) => onUpdateCharacter(character.id, "gender", value)}
+                        disabled={!isActive || isUploadingCharacterPhoto[character.id]}
+                        className={cn("flex gap-4", errors.gender ? "border border-red-500 rounded-md p-2" : "")}
+                      >
+                        <div className="flex items-center">
+                          <RadioGroupItem id={`gender-boy-${character.id}`} value="Boy" />
+                          <Label htmlFor={`gender-boy-${character.id}`} className="ml-2 text-sm">Boy</Label>
+                        </div>
+                        <div className="flex items-center">
+                          <RadioGroupItem id={`gender-girl-${character.id}`} value="Girl" />
+                          <Label htmlFor={`gender-girl-${character.id}`} className="ml-2 text-sm">Girl</Label>
+                        </div>
+                        <div className="flex items-center">
+                          <RadioGroupItem id={`gender-other-${character.id}`} value="Other" />
+                          <Label htmlFor={`gender-other-${character.id}`} className="ml-2 text-sm">Other</Label>
+                        </div>
+                      </RadioGroup>
+                      {errors.gender && (
+                        <p className="text-xs text-red-500 mt-1">Character gender is required</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           
           {/* Add Character Button */}
           {characters.length < maxCharacters && (

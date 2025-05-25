@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from "framer-motion";
 import CheckoutCard from '@/components/wizard/CheckoutCard';
 import { toast } from 'sonner';
@@ -26,6 +26,9 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
   const { user } = useAuth();
   const { isUploadingCharacterPhoto } = useWizardCharacters({ dispatch });
   const { isUploading: isChildPhotoUploading } = useWizardPhotoUpload();
+  
+  const [childFieldErrors, setChildFieldErrors] = useState<{ name: boolean; gender: boolean; photo: boolean }>({ name: false, gender: false, photo: false });
+  const [characterFieldErrors, setCharacterFieldErrors] = useState<Record<string, { name: boolean; gender: boolean; photo: boolean }>>({});
   
   // Auto-fill email if user is logged in and email is not already in wizardData
   useEffect(() => {
@@ -132,7 +135,7 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         theme: wizardData.theme,
         subject: wizardData.subject,
         message: wizardData.message,
-        custom_note: wizardData.customNote || null,
+        custom_note: wizardData.customNote || "",
         style: wizardData.style,
         child_name: wizardData.childName,
         child_gender: wizardData.childGender,
@@ -193,6 +196,37 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
     }
   };
 
+  // Enhanced click handler for Create My Story with inline error state
+  const handleCreateStoryClick = () => {
+    // Validate child fields
+    const childErrors = {
+      name: !wizardData.childName,
+      gender: !wizardData.childGender,
+      photo: !wizardData.childPhotoUrl,
+    };
+    setChildFieldErrors(childErrors);
+
+    // Validate character fields
+    const charErrors: Record<string, { name: boolean; gender: boolean; photo: boolean }> = {};
+    wizardData.characters.forEach((char) => {
+      charErrors[char.id] = {
+        name: !char.name,
+        gender: !char.gender,
+        photo: !char.photoUrl,
+      };
+    });
+    setCharacterFieldErrors(charErrors);
+
+    // If any errors, do not proceed
+    const hasChildError = Object.values(childErrors).some(Boolean);
+    const hasCharError = Object.values(charErrors).some(errs => Object.values(errs).some(Boolean));
+    if (hasChildError || hasCharError) {
+      return;
+    }
+    // If all good, proceed
+    handleStripeCheckout();
+  };
+
   return (
     <motion.section
       id="step-10"
@@ -218,16 +252,17 @@ const CheckoutSection: React.FC<CheckoutSectionProps> = ({
         isSubmitting={isSubmitting} 
         isActive={true} 
         isUserLoggedIn={!!user}
+        childFieldErrors={childFieldErrors}
+        characterFieldErrors={characterFieldErrors}
       />
       
       {/* Stripe Checkout Button */}
       <div className="wizard-footer text-center mt-8">
         <button 
           type="button" 
-          style={{ backgroundColor: '#D2691E' }}
+          style={{ backgroundColor: '#D2691E', cursor: 'pointer' }}
           className="inline-block w-full md:w-auto text-white font-bold text-lg py-4 px-10 rounded-xl border-4 border-white shadow-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#D2691E] focus:ring-opacity-50 hover:brightness-90"
-          onClick={handleStripeCheckout}
-          disabled={isSubmitting || !wizardData.email || !wizardData.childPhotoUrl || isChildPhotoUploading || !!validateCharacters(wizardData.characters) || wizardData.characters.some(c => isUploadingCharacterPhoto[c.id])}
+          onClick={handleCreateStoryClick}
         >
           Create My Story — $9.99
         </button>
